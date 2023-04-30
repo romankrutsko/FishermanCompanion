@@ -1,0 +1,6 @@
+include 'persistence'
+include 'persistence-api'
+include 'service'
+include 'service-api'
+include 'rest'
+include 'rest-api'

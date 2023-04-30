@@ -1,0 +1,5 @@
+rootProject.name = 'companion'
+
+apply from: 'modules.gradle'
+include 'persistence'
+
