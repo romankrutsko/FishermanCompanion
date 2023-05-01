@@ -11,6 +11,16 @@ CREATE TABLE if not exists users
     role     ENUM ('user', 'admin') NOT NULL DEFAULT 'user'
 );
 
+CREATE TABLE if not exists sessions
+(
+    id            INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    user_id       INT UNSIGNED NOT NULL,
+    token         TEXT NOT NULL,
+    creation_time TIMESTAMP     NOT NULL,
+    expiration_time TIMESTAMP     NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users (id)
+);
+
 CREATE TABLE if not exists profiles
 (
     id        INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -36,7 +46,7 @@ CREATE TABLE if not exists posts
     category_id  INT UNSIGNED            NULL,
     title        VARCHAR(255)            NULL,
     description  TEXT                    NULL,
-    start_date   DATETIME                NULL,
+    start_date   TIMESTAMP                NULL,
     coordinates  VARCHAR(255),
     contact_info TEXT,
     status       ENUM ('open', 'closed') NOT NULL DEFAULT 'open',
