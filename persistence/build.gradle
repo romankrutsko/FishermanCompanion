@@ -1,5 +1,0 @@
-dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
-    implementation project(path: ':dto')
-    implementation project(path: ':persistence-api')
-}

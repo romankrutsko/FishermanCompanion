@@ -1,0 +1,7 @@
+include ':app:persistence'
+include ':app:persistence-api'
+include ':app:service'
+include ':app:service-api'
+include ':app:rest'
+include ':app:rest-api'
+include ':app:dto'
