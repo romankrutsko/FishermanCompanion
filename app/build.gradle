@@ -1,0 +1,8 @@
+dependencies {
+    implementation project(path: ':app:rest')
+    implementation project(path: ':app:dto')
+    implementation project(path: ':app:persistence')
+    implementation project(path: ':app:service')
+    implementation project(path: ':app:persistence-api')
+    implementation project(path: ':app:service-api')
+}

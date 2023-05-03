@@ -1,0 +1,4 @@
+dependencies {
+    implementation project(path: ':app:service-api')
+    implementation project(path: ':app:dto')
+}
