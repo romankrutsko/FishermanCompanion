@@ -16,5 +16,5 @@ public class ProfileDto {
     private String avatar;
     private String bio;
     private String location;
-    private String website;
+    private String contacts;
 }

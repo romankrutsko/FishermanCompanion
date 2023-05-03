@@ -19,8 +19,8 @@ public class ProfileRepositoryJdbcImpl implements ProfileRepository {
     @Override
     public void saveProfile(final ProfileDto profile) {
         final String sql = """
-                INSERT INTO profiles (user_id, full_name, avatar, bio, location, website)
-                VALUES (:userId, :fullName, :avatar, :bio, :location, :website)
+                INSERT INTO profiles (user_id, full_name, avatar, bio, location, contacts)
+                VALUES (:userId, :fullName, :avatar, :bio, :location, :contacts)
                 """;
 
         final Map<String, Object> params = Map.of(
@@ -29,7 +29,7 @@ public class ProfileRepositoryJdbcImpl implements ProfileRepository {
                 "avatar", profile.getAvatar(),
                 "bio", profile.getBio(),
                 "location", profile.getLocation(),
-                "website", profile.getWebsite()
+                "contacts", profile.getContacts()
         );
 
         namedParameterJdbcTemplate.update(sql, params);
@@ -38,7 +38,7 @@ public class ProfileRepositoryJdbcImpl implements ProfileRepository {
     @Override
     public ProfileDto findProfileById(final Long id) {
         final String sql = """
-                SELECT id, user_id, full_name, avatar, bio, location, website
+                SELECT id, user_id, full_name, avatar, bio, location, contacts
                 FROM profiles
                 WHERE id = :id
                 """;
@@ -52,7 +52,7 @@ public class ProfileRepositoryJdbcImpl implements ProfileRepository {
     @Override
     public ProfileDto findProfileByUserId(final Long userId) {
         final String sql = """
-                SELECT id, user_id, full_name, avatar, bio, location, website
+                SELECT id, user_id, full_name, avatar, bio, location, contacts
                 FROM profiles
                 WHERE user_id = :userId
                 """;
@@ -71,7 +71,7 @@ public class ProfileRepositoryJdbcImpl implements ProfileRepository {
                     avatar = :avatar,
                     bio = :bio,
                     location = :location,
-                    website = :website
+                    contacts = :contacts
                 WHERE id = :id
                 """;
 
@@ -81,7 +81,7 @@ public class ProfileRepositoryJdbcImpl implements ProfileRepository {
                 "avatar", profile.getAvatar(),
                 "bio", profile.getBio(),
                 "location", profile.getLocation(),
-                "website", profile.getWebsite()
+                "contacts", profile.getContacts()
         );
 
         namedParameterJdbcTemplate.update(sql, params);
@@ -106,7 +106,7 @@ public class ProfileRepositoryJdbcImpl implements ProfileRepository {
                              .avatar(rs.getString("avatar"))
                              .bio(rs.getString("bio"))
                              .location(rs.getString("location"))
-                             .website(rs.getString("website"))
+                             .contacts(rs.getString("contacts"))
                              .build();
         }
     }

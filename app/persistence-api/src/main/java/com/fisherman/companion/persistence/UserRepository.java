@@ -6,6 +6,11 @@ import com.fisherman.companion.dto.UserDto;
 
 public interface UserRepository {
     void saveUser(final UserDto user);
+
+    boolean isUsernameNotUnique(String username);
+
+    boolean isEmailNotUnique(String email);
+
     UserDto findUserById(final Long id);
     List<UserDto> findAllUsers();
     void updateUser(final UserDto user);

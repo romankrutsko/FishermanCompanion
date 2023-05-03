@@ -29,7 +29,7 @@ CREATE TABLE if not exists profiles
     avatar    VARCHAR(255),
     bio       TEXT,
     location  VARCHAR(255),
-    website   VARCHAR(255),
+    contacts   VARCHAR(255),
     FOREIGN KEY (user_id) REFERENCES users (id)
 );
 

@@ -34,6 +34,23 @@ public class UserRepositoryJdbcImpl implements UserRepository {
 
         namedParameterJdbcTemplate.update(sql, params);
     }
+    @Override
+    public boolean isUsernameNotUnique(String username) {
+        final String sql = "SELECT COUNT(*) FROM users WHERE username = :username";
+
+        final Integer count = namedParameterJdbcTemplate.queryForObject(sql, Map.of("username", username), Integer.class);
+
+        return (count != null && count > 0);
+    }
+
+    @Override
+    public boolean isEmailNotUnique(String email) {
+        final String sql = "SELECT COUNT(*) FROM users WHERE email = :email";
+
+        final Integer count = namedParameterJdbcTemplate.queryForObject(sql, Map.of("email", email), Integer.class);
+
+        return (count != null && count > 0);
+    }
 
     @Override
     public UserDto findUserById(final Long id) {
@@ -81,7 +98,7 @@ public class UserRepositoryJdbcImpl implements UserRepository {
     @Override
     public void deleteUserById(final Long id) {
         final String sql = """
-                    DELETE u, p FROM user u LEFT JOIN profiles p ON u.id = p.user_id
+                    DELETE u, p FROM users u LEFT JOIN profiles p ON u.id = p.user_id
                     WHERE u.id = :id
                 """;
 
