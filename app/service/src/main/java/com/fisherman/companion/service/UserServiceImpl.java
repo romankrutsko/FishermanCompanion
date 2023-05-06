@@ -64,11 +64,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public String updateUserPassword(final HttpServletRequest request, final UpdatePasswordRequest passwordRequest) {
-        if (cookieService.isNotAuthenticated(request)) {
-            throw new UnauthorizedException(ResponseStatus.UNAUTHORIZED.getCode());
-        }
-
-        final UserDto user = cookieService.getUserFromCookies(request);
+        final UserDto user = cookieService.verifyAuthentication(request);
 
         return Optional.ofNullable(user)
                        .map(u -> changePassword(u, passwordRequest.password()))
@@ -91,11 +87,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public String updateUsername(final HttpServletRequest request, final UpdateUsernameRequest usernameRequest, final HttpServletResponse response) {
-        if (cookieService.isNotAuthenticated(request)) {
-            throw new UnauthorizedException(ResponseStatus.UNAUTHORIZED.getCode());
-        }
-
-        final UserDto user = cookieService.getUserFromCookies(request);
+        final UserDto user = cookieService.verifyAuthentication(request);
 
         if (userRepository.isUsernameNotUnique(usernameRequest.username())) {
             throw new RequestException(ResponseStatus.USERNAME_IS_TAKEN.getCode());
@@ -119,11 +111,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public String deleteUser(final HttpServletRequest request, HttpServletResponse response) {
-        if (cookieService.isNotAuthenticated(request)) {
-            throw new UnauthorizedException(ResponseStatus.UNAUTHORIZED.getCode());
-        }
-
-        final UserDto user = cookieService.getUserFromCookies(request);
+        final UserDto user = cookieService.verifyAuthentication(request);
 
         return Optional.ofNullable(user)
                        .map(userDto -> deleteUserById(request, userDto.getId(), response))

@@ -6,7 +6,6 @@ import com.fisherman.companion.dto.request.LoginRequest;
 import com.fisherman.companion.dto.response.ResponseStatus;
 import com.fisherman.companion.persistence.UserRepository;
 import com.fisherman.companion.service.exception.RequestException;
-import com.fisherman.companion.service.exception.UnauthorizedException;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -38,9 +37,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public String logout(HttpServletRequest request, HttpServletResponse response) {
-        if (cookieService.isNotAuthenticated(request)) {
-            throw new UnauthorizedException(ResponseStatus.UNAUTHORIZED.getCode());
-        }
+        cookieService.verifyAuthentication(request);
 
         cookieService.deleteAllCookies(request, response);
 

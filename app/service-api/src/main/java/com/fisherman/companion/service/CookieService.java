@@ -8,11 +8,9 @@ import jakarta.servlet.http.HttpServletResponse;
 public interface CookieService {
     boolean isTokenValid(final String token);
 
-    boolean isNotAuthenticated(HttpServletRequest request);
+    UserDto verifyAuthentication(HttpServletRequest request);
 
     String getToken(HttpServletRequest request);
-
-    UserDto getUserFromCookies(HttpServletRequest request);
 
     void updateCookies(UserDto userDto, HttpServletResponse response);
 

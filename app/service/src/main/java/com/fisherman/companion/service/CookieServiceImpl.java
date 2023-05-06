@@ -10,7 +10,9 @@ import javax.crypto.spec.SecretKeySpec;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import com.fisherman.companion.dto.UserDto;
+import com.fisherman.companion.dto.response.ResponseStatus;
 import com.fisherman.companion.persistence.UserRepository;
+import com.fisherman.companion.service.exception.UnauthorizedException;
 
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
@@ -82,11 +84,25 @@ public class CookieServiceImpl implements CookieService {
     }
 
     @Override
-    public boolean isNotAuthenticated(HttpServletRequest request) {
+    public UserDto verifyAuthentication(HttpServletRequest request) {
+        if (isNotAuthenticated(request)) {
+            throw new UnauthorizedException(ResponseStatus.UNAUTHORIZED.getCode());
+        }
+        return getUserFromCookies(request);
+    }
+
+    private boolean isNotAuthenticated(final HttpServletRequest request) {
         String token = getToken(request);
 
         return token == null || !isTokenValid(token);
     }
+
+    private UserDto getUserFromCookies(final HttpServletRequest request) {
+        final String username = findUsernameFromToken(request);
+
+        return userRepository.findUserByUsername(username);
+    }
+
 
     @Override
     public String getToken(HttpServletRequest request) {
@@ -112,13 +128,6 @@ public class CookieServiceImpl implements CookieService {
         Cookie cookie = getCookie(request);
 
         return Optional.ofNullable(cookie).map(Cookie::getValue).orElse(null);
-    }
-
-    @Override
-    public UserDto getUserFromCookies(final HttpServletRequest request) {
-        final String username = findUsernameFromToken(request);
-
-        return userRepository.findUserByUsername(username);
     }
 
     @Override
