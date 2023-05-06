@@ -7,15 +7,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 public interface CookieService {
-    String generateToken(String username, String password);
+    boolean isTokenValid(final String token);
 
-    boolean isTokenValid(final String token, final Long userId);
+    String findUsernameFromToken(HttpServletRequest request);
 
     boolean isNotAuthenticated(HttpServletRequest request);
 
     String getToken(HttpServletRequest request);
-
-    Long getUserId(HttpServletRequest request);
 
     Cookie getCookieFromRequest(HttpServletRequest request, String cookieName);
 

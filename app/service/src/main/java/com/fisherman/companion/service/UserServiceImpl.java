@@ -65,9 +65,9 @@ public class UserServiceImpl implements UserService {
     }
 
     private UserDto getUserFromCookies(final HttpServletRequest request) {
-        final Long userId = cookieService.getUserId(request);
+        final String username = cookieService.findUsernameFromToken(request);
 
-        return userRepository.findUserById(userId);
+        return userRepository.findUserByUsername(username);
     }
 
     private ResponseEntity<String> changePassword(final UserDto userDto, final String password, HttpServletResponse response) {

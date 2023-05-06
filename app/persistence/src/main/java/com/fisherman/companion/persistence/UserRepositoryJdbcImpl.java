@@ -53,6 +53,20 @@ public class UserRepositoryJdbcImpl implements UserRepository {
     }
 
     @Override
+    public UserDto findUserByUsername(final String username) {
+        final String sql = """
+                    SELECT *
+                    FROM users
+                    WHERE username = :username
+                """;
+
+        return namedParameterJdbcTemplate.query(sql, Map.of("username", username), new UserMapper())
+                                         .stream()
+                                         .findFirst()
+                                         .orElse(null);
+    }
+
+    @Override
     public UserDto findUserById(final Long id) {
         final String sql = """
                     SELECT *
