@@ -21,22 +21,22 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/create")
-    ResponseEntity<String> createUser(@RequestBody CreateUserRequest request) {
+    String createUser(@RequestBody CreateUserRequest request) {
         return userService.createUser(request);
     }
 
     @PostMapping("/change/password")
-    ResponseEntity<String> updatePassword(HttpServletRequest request, @RequestBody UpdatePasswordRequest passwordRequest, HttpServletResponse response) {
+    String updatePassword(HttpServletRequest request, @RequestBody UpdatePasswordRequest passwordRequest, HttpServletResponse response) {
         return userService.updateUserPassword(request, passwordRequest, response);
     }
 
     @PostMapping("/change/username")
-    ResponseEntity<String> updateUsername(HttpServletRequest request, @RequestBody UpdateUsernameRequest usernameRequest, HttpServletResponse response) {
+    String updateUsername(HttpServletRequest request, @RequestBody UpdateUsernameRequest usernameRequest, HttpServletResponse response) {
         return userService.updateUsername(request, usernameRequest, response);
     }
 
     @PostMapping("/delete")
-    ResponseEntity<String> deleteUser(HttpServletRequest request, HttpServletResponse response) {
+    String deleteUser(HttpServletRequest request, HttpServletResponse response) {
         return userService.deleteUser(request, response);
     }
 }

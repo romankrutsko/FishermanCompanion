@@ -1,6 +1,5 @@
 package com.fisherman.companion.rest;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,12 +19,12 @@ public class AuthenticationController {
     private final AuthenticationService authenticationService;
 
     @PostMapping("/login")
-    ResponseEntity<String> login(@RequestBody LoginRequest request, HttpServletResponse response) {
+    String login(@RequestBody LoginRequest request, HttpServletResponse response) {
         return authenticationService.login(request, response);
     }
 
     @PostMapping("/logout")
-    ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
+    String logout(HttpServletRequest request, HttpServletResponse response) {
         return authenticationService.logout(request, response);
     }
 }

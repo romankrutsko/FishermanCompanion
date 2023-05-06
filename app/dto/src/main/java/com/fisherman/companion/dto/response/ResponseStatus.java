@@ -16,6 +16,7 @@ public enum ResponseStatus {
     TOKEN_IS_INVALID("Token is invalid"),
     WRONG_CREDENTIALS("Login failed, wrong username or password"),
     EMAIL_IS_TAKEN("Given email is already taken"),
+    EMAIL_IS_NOT_VALID("Given email is not valid"),
     USERNAME_IS_TAKEN("Given username is already taken"),
     PASSWORD_CANNOT_BE_SAME("Given password is same as current, please try another one"),
     USER_CANNOT_BE_FOUND("User cannot be found");
