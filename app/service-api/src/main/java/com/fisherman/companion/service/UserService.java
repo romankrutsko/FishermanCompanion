@@ -10,7 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 public interface UserService {
     String createUser(CreateUserRequest createUserRequest);
 
-    String updateUserPassword(HttpServletRequest request, UpdatePasswordRequest passwordRequest, HttpServletResponse response);
+    String updateUserPassword(HttpServletRequest request, UpdatePasswordRequest passwordRequest);
 
     String updateUsername(HttpServletRequest request, UpdateUsernameRequest usernameRequest, HttpServletResponse response);
 

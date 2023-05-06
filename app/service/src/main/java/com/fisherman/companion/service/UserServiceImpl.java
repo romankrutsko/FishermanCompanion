@@ -63,7 +63,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String updateUserPassword(final HttpServletRequest request, final UpdatePasswordRequest passwordRequest, HttpServletResponse response) {
+    public String updateUserPassword(final HttpServletRequest request, final UpdatePasswordRequest passwordRequest) {
         if (cookieService.isNotAuthenticated(request)) {
             throw new UnauthorizedException(ResponseStatus.UNAUTHORIZED.getCode());
         }
@@ -71,7 +71,7 @@ public class UserServiceImpl implements UserService {
         final UserDto user = getUserFromCookies(request);
 
         return Optional.ofNullable(user)
-                       .map(u -> changePassword(u, passwordRequest.password(), response))
+                       .map(u -> changePassword(u, passwordRequest.password()))
                        .orElseThrow(() -> new UnauthorizedException(ResponseStatus.USER_CANNOT_BE_FOUND.getCode()));
     }
 
@@ -81,7 +81,7 @@ public class UserServiceImpl implements UserService {
         return userRepository.findUserByUsername(username);
     }
 
-    private String changePassword(final UserDto userDto, final String password, HttpServletResponse response) {
+    private String changePassword(final UserDto userDto, final String password) {
         String hashedPassword = hashService.hash(password);
 
         if (Objects.equals(hashedPassword, userDto.getPassword())) {
@@ -91,8 +91,6 @@ public class UserServiceImpl implements UserService {
         userDto.setPassword(hashedPassword);
 
         userRepository.updateUser(userDto);
-
-        cookieService.updateCookies(userDto, response);
 
         return ResponseStatus.PASSWORD_CHANGED_SUCCESSFULLY.getCode();
     }

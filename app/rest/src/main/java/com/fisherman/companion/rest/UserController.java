@@ -1,6 +1,5 @@
 package com.fisherman.companion.rest;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,8 +25,8 @@ public class UserController {
     }
 
     @PostMapping("/change/password")
-    String updatePassword(HttpServletRequest request, @RequestBody UpdatePasswordRequest passwordRequest, HttpServletResponse response) {
-        return userService.updateUserPassword(request, passwordRequest, response);
+    String updatePassword(HttpServletRequest request, @RequestBody UpdatePasswordRequest passwordRequest) {
+        return userService.updateUserPassword(request, passwordRequest);
     }
 
     @PostMapping("/change/username")
