@@ -68,17 +68,11 @@ public class UserServiceImpl implements UserService {
             throw new UnauthorizedException(ResponseStatus.UNAUTHORIZED.getCode());
         }
 
-        final UserDto user = getUserFromCookies(request);
+        final UserDto user = cookieService.getUserFromCookies(request);
 
         return Optional.ofNullable(user)
                        .map(u -> changePassword(u, passwordRequest.password()))
                        .orElseThrow(() -> new UnauthorizedException(ResponseStatus.USER_CANNOT_BE_FOUND.getCode()));
-    }
-
-    private UserDto getUserFromCookies(final HttpServletRequest request) {
-        final String username = cookieService.findUsernameFromToken(request);
-
-        return userRepository.findUserByUsername(username);
     }
 
     private String changePassword(final UserDto userDto, final String password) {
@@ -101,7 +95,7 @@ public class UserServiceImpl implements UserService {
             throw new UnauthorizedException(ResponseStatus.UNAUTHORIZED.getCode());
         }
 
-        final UserDto user = getUserFromCookies(request);
+        final UserDto user = cookieService.getUserFromCookies(request);
 
         if (userRepository.isUsernameNotUnique(usernameRequest.username())) {
             throw new RequestException(ResponseStatus.USERNAME_IS_TAKEN.getCode());
@@ -129,7 +123,7 @@ public class UserServiceImpl implements UserService {
             throw new UnauthorizedException(ResponseStatus.UNAUTHORIZED.getCode());
         }
 
-        final UserDto user = getUserFromCookies(request);
+        final UserDto user = cookieService.getUserFromCookies(request);
 
         return Optional.ofNullable(user)
                        .map(userDto -> deleteUserById(request, userDto.getId(), response))

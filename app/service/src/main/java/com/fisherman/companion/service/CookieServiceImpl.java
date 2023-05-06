@@ -10,6 +10,8 @@ import javax.crypto.spec.SecretKeySpec;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import com.fisherman.companion.dto.UserDto;
+import com.fisherman.companion.persistence.UserRepository;
+
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -26,6 +28,8 @@ public class CookieServiceImpl implements CookieService {
     private Integer maxAge;
     @Value("${jwt.secret}")
     private String secret;
+
+    private final UserRepository userRepository;
 
     private String signToken(final String username) {
         final Date currentTime = new Date();
@@ -65,8 +69,7 @@ public class CookieServiceImpl implements CookieService {
         }
     }
 
-    @Override
-    public String findUsernameFromToken(HttpServletRequest request) {
+    private String findUsernameFromToken(HttpServletRequest request) {
         final String token = getTokenFromRequest(request);
         final Key key = getKey(secret);
 
@@ -91,29 +94,31 @@ public class CookieServiceImpl implements CookieService {
     }
 
     private String getTokenFromRequest(HttpServletRequest request) {
-        return getCookieValue(request, TOKEN);
+        return getCookieValue(request);
     }
 
-    private Cookie getCookie(final HttpServletRequest request, String cookieName) {
+    private Cookie getCookie(final HttpServletRequest request) {
         final List<Cookie> cookieList = Optional.ofNullable(request.getCookies())
                                                 .map(Arrays::asList)
                                                 .orElse(List.of());
 
         return cookieList.stream()
-                         .filter(cookies -> cookies.getName().equals(cookieName))
+                         .filter(cookies -> cookies.getName().equals(CookieServiceImpl.TOKEN))
                          .findFirst()
                          .orElse(null);
     }
 
-    private String getCookieValue(final HttpServletRequest request, String cookieName) {
-        Cookie cookie = getCookie(request, cookieName);
+    private String getCookieValue(final HttpServletRequest request) {
+        Cookie cookie = getCookie(request);
 
         return Optional.ofNullable(cookie).map(Cookie::getValue).orElse(null);
     }
 
     @Override
-    public Cookie getCookieFromRequest(final HttpServletRequest request, String cookieName) {
-        return getCookie(request, cookieName);
+    public UserDto getUserFromCookies(final HttpServletRequest request) {
+        final String username = findUsernameFromToken(request);
+
+        return userRepository.findUserByUsername(username);
     }
 
     @Override
@@ -132,7 +137,7 @@ public class CookieServiceImpl implements CookieService {
 
     @Override
     public void deleteAllCookies(HttpServletRequest request, HttpServletResponse response) {
-        Cookie token = getCookie(request, TOKEN);
+        Cookie token = getCookie(request);
 
         if (token != null) {
             deleteCookie(token, response);
