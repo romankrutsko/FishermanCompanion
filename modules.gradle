@@ -1,6 +1,2 @@
-include 'persistence'
-include 'persistence-api'
-include 'service'
-include 'service-api'
-include 'rest'
-include 'rest-api'
+include ':app'
+apply from: "app/modules.gradle"

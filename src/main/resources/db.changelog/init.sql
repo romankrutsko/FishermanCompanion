@@ -19,7 +19,7 @@ CREATE TABLE if not exists profiles
     avatar    VARCHAR(255),
     bio       TEXT,
     location  VARCHAR(255),
-    website   VARCHAR(255),
+    contacts  VARCHAR(255),
     FOREIGN KEY (user_id) REFERENCES users (id)
 );
 
@@ -36,7 +36,7 @@ CREATE TABLE if not exists posts
     category_id  INT UNSIGNED            NULL,
     title        VARCHAR(255)            NULL,
     description  TEXT                    NULL,
-    start_date   DATETIME                NULL,
+    start_date   TIMESTAMP               NULL,
     coordinates  VARCHAR(255),
     contact_info TEXT,
     status       ENUM ('open', 'closed') NOT NULL DEFAULT 'open',
@@ -56,10 +56,10 @@ CREATE TABLE if not exists requests
 
 CREATE TABLE if not exists ratings
 (
-    id      INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    user_id INT UNSIGNED NOT NULL,
-    post_id INT UNSIGNED NOT NULL,
-    rating  INT          NULL,
-    FOREIGN KEY (user_id) REFERENCES users (id),
-    FOREIGN KEY (post_id) REFERENCES posts (id)
+    id       INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    user_id  INT UNSIGNED NOT NULL,
+    rated_by INT UNSIGNED NULL,
+    rating   INT          NULL,
+    comment  TEXT         NULL,
+    FOREIGN KEY (user_id) REFERENCES users (id)
 );
