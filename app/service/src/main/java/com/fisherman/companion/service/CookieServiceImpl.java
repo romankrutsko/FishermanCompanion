@@ -33,24 +33,6 @@ public class CookieServiceImpl implements CookieService {
 
     private final UserRepository userRepository;
 
-    private String signToken(final String username) {
-        final Date currentTime = new Date();
-        final Date expirationDate = getExpirationDate(currentTime, maxAge);
-        final Key key = getKey(secret);
-
-        return Jwts.builder()
-                   .setSubject(username)
-                   .setIssuedAt(currentTime)
-                   .setExpiration(expirationDate)
-                   .signWith(key)
-                   .compact();
-    }
-
-    private Key getKey(final String secretKey) {
-        final byte[] secretBytes = secretKey.getBytes(StandardCharsets.UTF_8);
-        return new SecretKeySpec(secretBytes, SignatureAlgorithm.HS256.getJcaName());
-    }
-
     private Date getExpirationDate(Date currentDate, Integer maxAge) {
         return new Date(currentDate.getTime() + maxAge);
     }
@@ -71,16 +53,9 @@ public class CookieServiceImpl implements CookieService {
         }
     }
 
-    private String findUsernameFromToken(HttpServletRequest request) {
-        final String token = getTokenFromRequest(request);
-        final Key key = getKey(secret);
-
-        final JwtParser jwtParser = Jwts.parserBuilder()
-                                        .setSigningKey(key)
-                                        .build();
-
-
-        return jwtParser.parseClaimsJws(token).getBody().getSubject();
+    private Key getKey(final String secretKey) {
+        final byte[] secretBytes = secretKey.getBytes(StandardCharsets.UTF_8);
+        return new SecretKeySpec(secretBytes, SignatureAlgorithm.HS256.getJcaName());
     }
 
     @Override
@@ -101,6 +76,18 @@ public class CookieServiceImpl implements CookieService {
         final String username = findUsernameFromToken(request);
 
         return userRepository.findUserByUsername(username);
+    }
+
+    private String findUsernameFromToken(HttpServletRequest request) {
+        final String token = getTokenFromRequest(request);
+        final Key key = getKey(secret);
+
+        final JwtParser jwtParser = Jwts.parserBuilder()
+                                        .setSigningKey(key)
+                                        .build();
+
+
+        return jwtParser.parseClaimsJws(token).getBody().getSubject();
     }
 
 
@@ -142,6 +129,19 @@ public class CookieServiceImpl implements CookieService {
         cookieToken.setMaxAge(maxAgeInSeconds);
 
         response.addCookie(cookieToken);
+    }
+
+    private String signToken(final String username) {
+        final Date currentTime = new Date();
+        final Date expirationDate = getExpirationDate(currentTime, maxAge);
+        final Key key = getKey(secret);
+
+        return Jwts.builder()
+                   .setSubject(username)
+                   .setIssuedAt(currentTime)
+                   .setExpiration(expirationDate)
+                   .signWith(key)
+                   .compact();
     }
 
     @Override

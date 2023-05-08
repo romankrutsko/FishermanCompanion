@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -93,19 +94,20 @@ public class UserRepositoryJdbcImpl implements UserRepository {
     public void updateUser(final UserDto user) {
         final String sql = """
                     UPDATE users
-                    SET username = :username,
-                        email = :email,
-                        password = :password,
-                        role = :role
+                    SET username = COALESCE(:usermame, username),
+                        email = COALESCE(:email, email),
+                        password = COALESCE(:password, password),
+                        role = COALESCE(:role, role)
                     WHERE id = :id
                 """;
-        final Map<String, Object> params = Map.of(
-                "id", user.getId(),
-                "username", user.getUsername(),
-                "email", user.getEmail(),
-                "password", user.getPassword(),
-                "role", user.getRole()
-        );
+
+        final MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("id", user.getId())
+                .addValue("username", user.getUsername())
+                .addValue("email", user.getEmail())
+                .addValue("password", user.getPassword())
+                .addValue("role", user.getRole());
+
         namedParameterJdbcTemplate.update(sql, params);
     }
 

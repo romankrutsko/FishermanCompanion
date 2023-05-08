@@ -59,6 +59,7 @@ public class UserServiceImpl implements UserService {
         userDto.setRole(UserRole.USER.name().toLowerCase());
 
         userRepository.saveUser(userDto);
+
         return ResponseStatus.USER_CREATED_SUCCESSFULLY.getCode();
     }
 
@@ -78,9 +79,12 @@ public class UserServiceImpl implements UserService {
             throw new RequestException(ResponseStatus.PASSWORD_CANNOT_BE_SAME.getCode());
         }
 
-        userDto.setPassword(hashedPassword);
+        final UserDto userToUpdate = UserDto.builder()
+                                            .id(userDto.getId())
+                                            .password(hashedPassword)
+                                            .build();
 
-        userRepository.updateUser(userDto);
+        userRepository.updateUser(userToUpdate);
 
         return ResponseStatus.PASSWORD_CHANGED_SUCCESSFULLY.getCode();
     }
@@ -99,10 +103,12 @@ public class UserServiceImpl implements UserService {
     }
 
     private String changeUsername(final UserDto userDto, final String username, final HttpServletResponse response) {
+        final UserDto userToUpdate = UserDto.builder()
+                                            .id(userDto.getId())
+                                            .username(username)
+                                            .build();
 
-        userDto.setUsername(username);
-
-        userRepository.updateUser(userDto);
+        userRepository.updateUser(userToUpdate);
 
         cookieService.updateCookies(userDto, response);
 
