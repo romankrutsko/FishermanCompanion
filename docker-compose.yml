@@ -1,0 +1,30 @@
+version: '3.3'
+
+services:
+  fisherman-mysql:
+    image: mysql:8.0
+    container_name: fisherman-mysql
+    hostname: fisherman_companion
+    environment:
+      - MYSQL_ROOT_PASSWORD=root1234
+      - MYSQL_DATABASE=fisherman_companion
+    ports:
+      - "3306:3306"
+    volumes:
+      - fisherman-mysql-data:/var/lib/mysql
+  fisherman-companion:
+    build: .
+    platform: linux/amd64
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://fisherman-mysql:3306/fisherman_companion
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root1234
+      SPRING_LIQUIBASE_ENABLED: "true"
+      SPRING_LIQUIBASE_CHANGELOG: classpath:/db.changelog/changelog-master.yaml
+    depends_on:
+      - fisherman-mysql
+
+volumes:
+  fisherman-mysql-data:
