@@ -10,5 +10,5 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mysql://containers-us-west-152.railway.app:6725/railway
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: 3s1PHTkdA6LRTN2ZBp0E
-      SPRING_LIQUIBASE_ENABLED: "true"
-      SPRING_LIQUIBASE_CHANGELOG: classpath:/db.changelog/changelog-master.yaml
+#      SPRING_LIQUIBASE_ENABLED: "true"
+#      SPRING_LIQUIBASE_CHANGELOG: classpath:/db.changelog/changelog-master.yaml
