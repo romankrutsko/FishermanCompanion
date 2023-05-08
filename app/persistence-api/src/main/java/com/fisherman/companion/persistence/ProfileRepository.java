@@ -7,5 +7,5 @@ public interface ProfileRepository {
     ProfileDto findProfileById(final Long id);
     ProfileDto findProfileByUserId(final Long userId);
     void updateProfile(final ProfileDto profile);
-    void deleteProfileById(final Long id);
+    void deleteProfileByUserId(final Long userId);
 }

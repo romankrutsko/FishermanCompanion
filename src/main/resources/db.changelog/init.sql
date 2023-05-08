@@ -11,16 +11,6 @@ CREATE TABLE if not exists users
     role     ENUM ('user', 'admin') NOT NULL DEFAULT 'user'
 );
 
-CREATE TABLE if not exists sessions
-(
-    id              INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    user_id         INT UNSIGNED NOT NULL,
-    token           TEXT         NOT NULL,
-    creation_time   TIMESTAMP    NOT NULL,
-    expiration_time TIMESTAMP    NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users (id)
-);
-
 CREATE TABLE if not exists profiles
 (
     id        INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -29,7 +19,7 @@ CREATE TABLE if not exists profiles
     avatar    VARCHAR(255),
     bio       TEXT,
     location  VARCHAR(255),
-    contacts   VARCHAR(255),
+    contacts  VARCHAR(255),
     FOREIGN KEY (user_id) REFERENCES users (id)
 );
 
@@ -66,10 +56,10 @@ CREATE TABLE if not exists requests
 
 CREATE TABLE if not exists ratings
 (
-    id      INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    user_id INT UNSIGNED NOT NULL,
-    post_id INT UNSIGNED NOT NULL,
-    rating  INT          NULL,
-    FOREIGN KEY (user_id) REFERENCES users (id),
-    FOREIGN KEY (post_id) REFERENCES posts (id)
+    id       INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    user_id  INT UNSIGNED NOT NULL,
+    rated_by INT UNSIGNED NULL,
+    rating   INT          NULL,
+    comment  TEXT         NULL,
+    FOREIGN KEY (user_id) REFERENCES users (id)
 );

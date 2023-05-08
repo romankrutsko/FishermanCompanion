@@ -11,6 +11,8 @@ public interface UserRepository {
 
     boolean isEmailNotUnique(String email);
 
+    UserDto findUserByUsername(String username);
+
     UserDto findUserById(final Long id);
     List<UserDto> findAllUsers();
     void updateUser(final UserDto user);

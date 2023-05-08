@@ -4,6 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -67,33 +68,32 @@ public class ProfileRepositoryJdbcImpl implements ProfileRepository {
     public void updateProfile(final ProfileDto profile) {
         final String sql = """
                 UPDATE profiles
-                SET full_name = :fullName,
-                    avatar = :avatar,
-                    bio = :bio,
-                    location = :location,
-                    contacts = :contacts
-                WHERE id = :id
+                SET full_name = COALESCE(:fullName, full_name),
+                    avatar = COALESCE(:avatar, avatar),
+                    bio = COALESCE(:bio, bio),
+                    location = COALESCE(:location, location),
+                    contacts = COALESCE(:contacts, contacts)
+                WHERE user_id = :userId
                 """;
 
-        final Map<String, Object> params = Map.of(
-                "id", profile.getId(),
-                "fullName", profile.getFullName(),
-                "avatar", profile.getAvatar(),
-                "bio", profile.getBio(),
-                "location", profile.getLocation(),
-                "contacts", profile.getContacts()
-        );
+        final MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("userId", profile.getUserId())
+                .addValue("fullName", profile.getFullName())
+                .addValue("avatar", profile.getAvatar())
+                .addValue("bio", profile.getBio())
+                .addValue("location", profile.getLocation())
+                .addValue("contacts", profile.getContacts());
 
         namedParameterJdbcTemplate.update(sql, params);
     }
 
     @Override
-    public void deleteProfileById(final Long id) {
+    public void deleteProfileByUserId(final Long userId) {
         final String sql = """
-                DELETE FROM profiles WHERE id = :id
+                DELETE FROM profiles WHERE user_id = :userId
                 """;
 
-        namedParameterJdbcTemplate.update(sql, Map.of("id", id));
+        namedParameterJdbcTemplate.update(sql, Map.of("userId", userId));
     }
 
     private static class ProfileMapper implements RowMapper<ProfileDto> {
