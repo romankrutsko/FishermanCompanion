@@ -1,6 +1,8 @@
 # Use an official OpenJDK runtime as a parent image
 FROM openjdk:17-alpine
 
+COPY gradlew .
+COPY gradle gradle
 # Build the application
 RUN ./gradlew build
 
