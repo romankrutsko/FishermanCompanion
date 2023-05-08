@@ -1,10 +1,8 @@
-# Use an official OpenJDK runtime as a parent image
+FROM gradle:latest AS BUILD
+WORKDIR /usr/app/
+COPY . .
+RUN gradle build -x test
+
 FROM openjdk:17-alpine
 
-COPY gradlew .
-COPY gradle gradle
-# Build the application
-RUN ./gradlew build
-
-# Start the application
 CMD ["java", "-jar", "build/libs/companion-0.0.1-SNAPSHOT.jar"]
