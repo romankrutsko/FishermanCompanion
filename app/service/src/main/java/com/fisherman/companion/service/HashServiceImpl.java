@@ -11,7 +11,7 @@ import com.google.common.hash.Hashing;
 @Service
 public class HashServiceImpl implements HashService {
     @Value("${user.password.salt}")
-    private static String salt;
+    private String salt;
     @Override
     public String hash(final String key) {
         final String saltedPassword = key + salt;
