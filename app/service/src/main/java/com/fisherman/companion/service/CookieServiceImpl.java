@@ -139,7 +139,7 @@ public class CookieServiceImpl implements CookieService {
 
         response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
-        return cookie.toString();
+        return token;
     }
 
     private String signToken(final String username) {
