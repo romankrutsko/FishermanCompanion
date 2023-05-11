@@ -35,7 +35,7 @@ public class CookieServiceImpl implements CookieService {
     private String secret;
 
     @Value("${cookies.set.secure}")
-    private final boolean secure;
+    private boolean secure;
 
     private final UserRepository userRepository;
 
