@@ -34,6 +34,9 @@ public class CookieServiceImpl implements CookieService {
     @Value("${jwt.secret}")
     private String secret;
 
+    @Value("${cookies.set.secure}")
+    private final boolean secure;
+
     private final UserRepository userRepository;
 
     private Date getExpirationDate(Date currentDate, Integer maxAge) {
@@ -128,7 +131,7 @@ public class CookieServiceImpl implements CookieService {
 
         ResponseCookie cookie = ResponseCookie.from(TOKEN, token)
                                               .httpOnly(true)
-                                              .secure(false)
+                                              .secure(secure)
                                               .path("/")
                                               .maxAge(Duration.ofSeconds(maxAgeInSeconds))
                                               .sameSite("None")
