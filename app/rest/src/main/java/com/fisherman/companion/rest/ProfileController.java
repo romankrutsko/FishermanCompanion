@@ -1,6 +1,7 @@
 package com.fisherman.companion.rest;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,8 +35,13 @@ public class ProfileController {
         return profileService.deleteUserProfile(request);
     }
 
-    @GetMapping("/get")
+    @GetMapping("/get/my")
     GetProfileResponse getProfile(HttpServletRequest request) {
         return profileService.getUserProfile(request);
+    }
+
+    @GetMapping("/get/{userId}")
+    GetProfileResponse getProfile(@PathVariable(value = "userId") Long userId) {
+        return profileService.getUserProfileById(userId);
     }
 }
