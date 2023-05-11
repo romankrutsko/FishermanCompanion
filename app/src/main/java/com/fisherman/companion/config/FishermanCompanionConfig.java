@@ -16,7 +16,7 @@ public class FishermanCompanionConfig {
     CorsConfigurationSource corsConfigurationSource() {
         UrlBasedCorsConfigurationSource configSource = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:3000/", "https://fishermancompanion-production.up.railway.app/", "http://localhost:8080/"));
+        config.setAllowedOrigins(List.of("http://localhost:3000", "https://fishermancompanion-production.up.railway.app", "http://localhost:8080"));
         config.setAllowedMethods(List.of("GET","POST"));
         config.setAllowedHeaders(List.of("content-type"));
         config.setAllowCredentials(true);
