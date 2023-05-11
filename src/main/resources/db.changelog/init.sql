@@ -37,11 +37,13 @@ CREATE TABLE if not exists posts
     title        VARCHAR(255)            NULL,
     description  TEXT                    NULL,
     start_date   TIMESTAMP               NULL,
-    coordinates  VARCHAR(255),
+    latitude     DECIMAL(10, 8)           NULL,
+    longitude    DECIMAL(11, 8)           NULL,
     contact_info TEXT,
     status       ENUM ('open', 'closed') NOT NULL DEFAULT 'open',
     FOREIGN KEY (user_id) REFERENCES users (id),
-    FOREIGN KEY (category_id) REFERENCES categories (id)
+    FOREIGN KEY (category_id) REFERENCES categories (id),
+    INDEX(latitude, longitude, start_date)
 );
 
 CREATE TABLE if not exists requests
