@@ -1,25 +1,26 @@
 package com.fisherman.companion.config;
 
+import java.util.List;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.CorsFilter;
 
 @Configuration
 @ComponentScan("com.fisherman.companion")
 public class FishermanCompanionConfig {
     @Bean
-    public CorsFilter corsFilter() {
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    CorsConfigurationSource corsConfigurationSource() {
+        UrlBasedCorsConfigurationSource configSource = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
-        config.addAllowedOrigin("http://localhost:3000/");
-        config.addAllowedOrigin("https://fishermancompanion-production.up.railway.app");
-        config.addAllowedHeader("*");
-        config.addAllowedMethod("*");
+        config.setAllowedOrigins(List.of("http://localhost:3000/", "https://fishermancompanion-production.up.railway.app/", "http://localhost:8080/"));
+        config.setAllowedMethods(List.of("GET","POST"));
+        config.setAllowedHeaders(List.of("content-type"));
         config.setAllowCredentials(true);
-        source.registerCorsConfiguration("/**", config);
-        return new CorsFilter(source);
+        configSource.registerCorsConfiguration("/**", config);
+        return configSource;
     }
 }
