@@ -20,6 +20,7 @@ public enum ResponseStatus {
     TOKEN_IS_INVALID("Token is invalid"),
     WRONG_CREDENTIALS("Login failed, wrong username or password"),
     INVALID_COORDINATES("Failed to create a post, invalid coordinates"),
+    INVALID_SETTLEMENT_PROVIDED("Failed to get autocomplete for settlement, invalid settlement provided"),
     EMAIL_IS_TAKEN("Given email is already taken"),
     EMAIL_IS_NOT_VALID("Given email is not valid"),
     USERNAME_IS_TAKEN("Given username is already taken"),
