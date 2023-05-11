@@ -2,12 +2,15 @@ package com.fisherman.companion.service;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import javax.crypto.spec.SecretKeySpec;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
 import com.fisherman.companion.dto.UserDto;
 import com.fisherman.companion.dto.response.ResponseStatus;
@@ -123,12 +126,15 @@ public class CookieServiceImpl implements CookieService {
 
         final int maxAgeInSeconds = maxAge / 1000;
 
-        final Cookie cookieToken = new Cookie(TOKEN, token);
-        cookieToken.setPath("/");
-        cookieToken.setHttpOnly(true);
-        cookieToken.setMaxAge(maxAgeInSeconds);
+        ResponseCookie cookie = ResponseCookie.from(TOKEN, token)
+                                              .httpOnly(true)
+                                              .secure(false)
+                                              .path("/")
+                                              .maxAge(Duration.ofSeconds(maxAgeInSeconds))
+                                              .sameSite("None")
+                                              .build();
 
-        response.addCookie(cookieToken);
+        response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 
     private String signToken(final String username) {
