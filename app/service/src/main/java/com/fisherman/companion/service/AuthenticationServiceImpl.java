@@ -30,9 +30,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         final UserDto userDto = userRepository.findUserById(userId);
 
-        cookieService.updateCookies(userDto, response);
-
-        return ResponseStatus.LOGGED_IN_SUCCESSFULLY.getCode();
+        return cookieService.updateCookies(userDto, response);
     }
 
     @Override

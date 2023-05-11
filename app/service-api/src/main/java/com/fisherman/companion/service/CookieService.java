@@ -12,7 +12,7 @@ public interface CookieService {
 
     String getToken(HttpServletRequest request);
 
-    void updateCookies(UserDto userDto, HttpServletResponse response);
+    String updateCookies(UserDto userDto, HttpServletResponse response);
 
     void deleteAllCookies(HttpServletRequest request, HttpServletResponse response);
 }
