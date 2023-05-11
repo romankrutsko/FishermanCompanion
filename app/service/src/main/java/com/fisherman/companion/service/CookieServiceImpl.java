@@ -124,7 +124,7 @@ public class CookieServiceImpl implements CookieService {
     }
 
     @Override
-    public void updateCookies(final UserDto userDto, final HttpServletResponse response) {
+    public String updateCookies(final UserDto userDto, final HttpServletResponse response) {
         final String token = signToken(userDto.getUsername());
 
         final int maxAgeInSeconds = maxAge / 1000;
@@ -138,6 +138,8 @@ public class CookieServiceImpl implements CookieService {
                                               .build();
 
         response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+
+        return cookie.toString();
     }
 
     private String signToken(final String username) {

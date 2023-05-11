@@ -110,9 +110,7 @@ public class UserServiceImpl implements UserService {
 
         userRepository.updateUser(userToUpdate);
 
-        cookieService.updateCookies(userDto, response);
-
-        return ResponseStatus.USERNAME_CHANGED_SUCCESSFULLY.getCode();
+        return cookieService.updateCookies(userDto, response);
     }
 
     @Override
