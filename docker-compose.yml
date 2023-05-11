@@ -1,7 +1,7 @@
 version: '3.3'
 
 services:
-  fisherman-companion:
+  fisherman-companion-app:
     build: .
     platform: linux/amd64
     ports:
