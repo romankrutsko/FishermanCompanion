@@ -18,6 +18,7 @@ public class FishermanCompanionConfig {
         config.addAllowedOrigin("https://fishermancompanion-production.up.railway.app");
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
+        config.setAllowCredentials(true);
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);
     }
