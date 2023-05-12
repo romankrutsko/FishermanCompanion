@@ -1,15 +1,20 @@
 package com.fisherman.companion.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fisherman.companion.dto.Geolocation;
 import com.fisherman.companion.dto.Predictions;
 import com.fisherman.companion.dto.response.GenericListResponse;
 import com.fisherman.companion.dto.response.PredictionResponse;
+import com.fisherman.companion.dto.response.ResponseStatus;
+import com.fisherman.companion.service.exception.RequestException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -18,24 +23,69 @@ import lombok.RequiredArgsConstructor;
 public class GeolocationServiceImpl implements GeolocationService {
 
     @Value("${google.api.key}")
-    private final String apiKey;
+    private String apiKey;
 
+    @Override
     public GenericListResponse<String> getAutocompleteSettlements(final String request) {
-        String url = UriComponentsBuilder.fromUriString("https://maps.googleapis.com/maps/api/place/autocomplete/json")
+        final String url = UriComponentsBuilder.fromUriString("https://maps.googleapis.com/maps/api/place/autocomplete/json")
                                          .queryParam("input", request)
                                          .queryParam("types", "(cities)")
                                          .queryParam("components", "country:ua")
                                          .queryParam("key", apiKey)
                                          .toUriString();
 
-        WebClient client = WebClient.create();
-        PredictionResponse response = client.get().uri(url).retrieve().bodyToMono(PredictionResponse.class).block();
-        List<Predictions> predictionsList = response.predictions();
+        final WebClient client = WebClient.create();
+        final PredictionResponse response = client.get().uri(url).retrieve().bodyToMono(PredictionResponse.class).block();
+        final List<Predictions> predictionsList = Optional.ofNullable(response).map(this::getPredictions).orElse(List.of());
 
-        List<String> cityList = predictionsList.stream()
+        final List<String> cityList = predictionsList.stream()
                                                .map(Predictions::description)
                                                .toList();
 
         return GenericListResponse.of(cityList);
+    }
+
+    private List<Predictions> getPredictions(final PredictionResponse predictionResponse) {
+        return Optional.of(predictionResponse)
+                       .filter(response -> response.status().equals("OK"))
+                       .map(PredictionResponse::predictions)
+                       .orElseThrow(() -> new RequestException(ResponseStatus.UNABLE_TO_GET_SETTLEMENTS.getCode()));
+    }
+
+    @Override
+    public Geolocation getCoordinates(final String settlementName) {
+        final String formattedSettlement = replaceSpacesWithPlus(settlementName);
+
+        final String url = UriComponentsBuilder.fromUriString("https://maps.googleapis.com/maps/api/geocode/json")
+                                         .queryParam("address", formattedSettlement)
+                                         .queryParam("components", "country:ua")
+                                         .queryParam("key", apiKey)
+                                         .toUriString();
+
+        final WebClient client = WebClient.create();
+
+        JsonNode response = client.get().uri(url).retrieve().bodyToMono(JsonNode.class).block();
+
+        return getGeolocation(response);
+    }
+
+    public String replaceSpacesWithPlus(final String input) {
+        return input.replace(" ", "+");
+    }
+
+    private Geolocation getGeolocation(final JsonNode response) {
+        return Optional.ofNullable(response)
+                       .filter(r -> r.get("status").asText().equals("OK"))
+                       .map(r -> r.get("results").get(0).get("geometry"))
+                       .map(this::getCoordinatesFromGeometry)
+                       .orElseThrow(() -> new RequestException(ResponseStatus.UNABLE_TO_GET_SETTLEMENTS.getCode()));
+    }
+
+    private Geolocation getCoordinatesFromGeometry(final JsonNode geometryNode) {
+        final JsonNode locationNode = geometryNode.get("location");
+        final Double lat = locationNode.get("lat").asDouble();
+        final Double lng = locationNode.get("lng").asDouble();
+
+        return new Geolocation(lat, lng);
     }
 }
