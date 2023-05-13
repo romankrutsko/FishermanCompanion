@@ -18,7 +18,7 @@ import com.fisherman.companion.dto.request.GetPostsInRadiusByCategoryRequest;
 import com.fisherman.companion.dto.request.UpdatePostRequest;
 import com.fisherman.companion.dto.response.GenericListResponse;
 import com.fisherman.companion.dto.response.PostResponse;
-import com.fisherman.companion.persistence.CategoriesRepository;
+import com.fisherman.companion.persistence.CategoryRepository;
 import com.fisherman.companion.persistence.PostRepository;
 import com.fisherman.companion.persistence.RatingRepository;
 
@@ -29,7 +29,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
-    private final CategoriesRepository categoriesRepository;
+    private final CategoryRepository categoryRepository;
     private final RatingRepository ratingRepository;
     private final CookieService cookieService;
     private final GeolocationService geolocationService;
@@ -76,7 +76,7 @@ public class PostServiceImpl implements PostService {
     }
 
     private void populatePostWithCategoryName(final PostDto post) {
-        final String categoryName = categoriesRepository.findCategoryNameById(post.getCategory().getId());
+        final String categoryName = categoryRepository.findCategoryNameById(post.getCategory().getId());
 
         post.getCategory().setName(categoryName);
     }

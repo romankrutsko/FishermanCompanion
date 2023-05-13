@@ -15,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 
 @Repository
 @RequiredArgsConstructor
-public class CategoriesRepositoryJdbcImpl implements CategoriesRepository {
+public class CategoryRepositoryJdbcImpl implements CategoryRepository {
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     @Override
