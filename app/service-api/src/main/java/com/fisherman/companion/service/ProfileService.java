@@ -12,5 +12,7 @@ public interface ProfileService {
 
     GetProfileResponse getUserProfile(HttpServletRequest request);
 
+    GetProfileResponse getUserProfileById(Long id);
+
     String deleteUserProfile(HttpServletRequest request);
 }

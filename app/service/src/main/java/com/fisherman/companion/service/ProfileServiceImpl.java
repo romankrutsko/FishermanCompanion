@@ -1,5 +1,7 @@
 package com.fisherman.companion.service;
 
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 
 import com.fisherman.companion.dto.ProfileDto;
@@ -56,9 +58,16 @@ public class ProfileServiceImpl implements ProfileService {
     public GetProfileResponse getUserProfile(final HttpServletRequest request) {
         final UserDto user = cookieService.verifyAuthentication(request);
 
-        final ProfileDto profile =  profileRepository.findProfileByUserId(user.getId());
+        final ProfileDto profile = profileRepository.findProfileByUserId(user.getId());
 
-        return mapToProfileResponse(profile);
+        return Optional.ofNullable(profile).map(this::mapToProfileResponse).orElse(null);
+    }
+
+    @Override
+    public GetProfileResponse getUserProfileById(final Long id) {
+        final ProfileDto profile = profileRepository.findProfileByUserId(id);
+
+        return Optional.ofNullable(profile).map(this::mapToProfileResponse).orElse(null);
     }
 
     private GetProfileResponse mapToProfileResponse(final ProfileDto profileDto) {
