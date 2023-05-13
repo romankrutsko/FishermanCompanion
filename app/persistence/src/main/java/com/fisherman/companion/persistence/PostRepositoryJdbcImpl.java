@@ -1,0 +1,182 @@
+package com.fisherman.companion.persistence;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Repository;
+
+import com.fisherman.companion.dto.BoundingBoxDimensions;
+import com.fisherman.companion.dto.CategoryDto;
+import com.fisherman.companion.dto.PostDto;
+import com.fisherman.companion.dto.PostStatus;
+
+import lombok.RequiredArgsConstructor;
+
+@Repository
+@RequiredArgsConstructor
+public class PostRepositoryJdbcImpl implements PostRepository {
+    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+
+    @Override
+    public Long savePost(final PostDto postDto) {
+        final String sql = """
+                INSERT INTO posts (user_id, category_id, title, description, start_date, latitude, longitude, contact_info, status)
+                VALUES (:userId, :categoryId, :title, :description, :startDate, :latitude, :longitude, :contactInfo, :status)
+                """;
+
+        final MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("userId", postDto.getUserId())
+                .addValue("categoryId", postDto.getCategory().getId())
+                .addValue("title", postDto.getTitle())
+                .addValue("description", postDto.getDescription())
+                .addValue("startDate", postDto.getStartDate())
+                .addValue("latitude", postDto.getLatitude())
+                .addValue("longitude", postDto.getLongitude())
+                .addValue("contactInfo", postDto.getContactInfo())
+                .addValue("status", postDto.getStatus().name());
+
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        namedParameterJdbcTemplate.update(sql, params, keyHolder);
+
+        return Objects.requireNonNull(keyHolder.getKey()).longValue();
+    }
+
+    @Override
+    public List<PostDto> findAllCategoriesPosts(final int take, final int skip, final LocalDateTime timeToFilter) {
+        final String sql = """
+                SELECT * FROM posts p
+                WHERE p.status = 'open' AND p.start_date >= :startDate
+                ORDER BY p.start_date
+                LIMIT :take
+                OFFSET :skip
+                """;
+
+        final Map<String, Object> params = Map.of(
+                "startDate", Timestamp.valueOf(timeToFilter),
+                "take", take,
+                "skip", skip
+        );
+
+        return namedParameterJdbcTemplate.query(sql, params, new PostMapper());
+    }
+
+    @Override
+    public List<PostDto> findPostsInBoundingBoxByCategory(final BoundingBoxDimensions boxDimensions, final LocalDateTime from, final LocalDateTime to, final Long categoryId) {
+        String sql = """
+                SELECT * FROM posts
+                WHERE status = 'open'
+                    AND start_date BETWEEN :from AND :to
+                    AND latitude BETWEEN :minLat AND :maxLat
+                    AND longitude BETWEEN :minLng AND :maxLng
+                    AND category_id = :category
+                ORDER BY start_date;
+                """;
+        final Map<String, Object> params = Map.of(
+                "minLat", boxDimensions.minLat(),
+                "minLng", boxDimensions.minLng(),
+                "maxLat", boxDimensions.maxLat(),
+                "maxLng", boxDimensions.maxLng(),
+                "from", Timestamp.valueOf(from),
+                "to", Timestamp.valueOf(to),
+                "category", categoryId
+        );
+
+        return namedParameterJdbcTemplate.query(sql, params, new PostMapper());
+    }
+
+    @Override
+    public List<PostDto> findUserPosts(final Long userId, final int take, final int skip) {
+        final String sql = """
+                SELECT *
+                FROM posts
+                WHERE user_id = :userId
+                ORDER BY start_date DESC
+                LIMIT :take
+                OFFSET :skip
+                """;
+
+        final MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("userId", userId)
+                .addValue("take", take)
+                .addValue("skip", skip);
+
+        return namedParameterJdbcTemplate.query(sql, params, new PostMapper());
+    }
+
+    @Override
+    public void updatePostById(final PostDto postDto) {
+        final String sql = """
+                UPDATE posts
+                SET user_id = COALESCE(:userId, user_id),
+                    category_id = COALESCE(:categoryId, category_id),
+                    title = COALESCE(:title, title),
+                    description = COALESCE(:description, description),
+                    start_date = COALESCE(:startDate, start_date),
+                    latitude = COALESCE(:latitude, latitude),
+                    longitude = COALESCE(:longitude, longitude),
+                    contact_info = COALESCE(:contactInfo, contact_info)
+                WHERE id = :id AND status = 'open'
+                """;
+
+        final MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("userId", postDto.getUserId())
+                .addValue("categoryId", postDto.getCategory().getId())
+                .addValue("title", postDto.getTitle())
+                .addValue("description", postDto.getDescription())
+                .addValue("startDate", postDto.getStartDate())
+                .addValue("latitude", postDto.getLatitude())
+                .addValue("longitude", postDto.getLongitude())
+                .addValue("contactInfo", postDto.getContactInfo())
+                .addValue("id", postDto.getId());
+
+        namedParameterJdbcTemplate.update(sql, params);
+    }
+
+    @Override
+    public void deleteById(final Long id, final Long userId) {
+        final String sql = """
+                DELETE FROM posts WHERE id = :id and user_id = :userId
+                """;
+
+        Map<String, Object> params = Map.of(
+                "id", id,
+                "userId", userId
+        );
+        namedParameterJdbcTemplate.update(sql, params);
+    }
+
+    private static class PostMapper implements RowMapper<PostDto> {
+        @Override
+        public PostDto mapRow(final ResultSet rs, final int rowNum) throws SQLException {
+            final CategoryDto category = new CategoryDto();
+
+            category.setId(rs.getLong("category_id"));
+
+            final PostDto post = new PostDto();
+
+            post.setId(rs.getLong("id"));
+            post.setUserId(rs.getLong("user_id"));
+            post.setCategory(category);
+            post.setTitle(rs.getString("title"));
+            post.setDescription(rs.getString("description"));
+            post.setStartDate(rs.getTimestamp("start_date").toLocalDateTime());
+            post.setLatitude(rs.getDouble("latitude"));
+            post.setLongitude(rs.getDouble("longitude"));
+            post.setContactInfo(rs.getString("contact_info"));
+            post.setStatus(PostStatus.valueOf(rs.getString("status").toUpperCase()));
+
+            return post;
+        }
+    }
+}
