@@ -5,8 +5,7 @@ public record CreatePostRequest(
         String title,
         String description,
         String startDate,
-        String latitude,
-        String longitude,
+        String settlement,
         String contactInfo
 ) {
 }

@@ -88,4 +88,24 @@ public class GeolocationServiceImpl implements GeolocationService {
 
         return new Geolocation(lat, lng);
     }
+
+    @Override
+    public String getSettlementName(final Double lat, final Double lng) {
+        final String url = UriComponentsBuilder.fromUriString("https://maps.googleapis.com/maps/api/geocode/json")
+                                               .queryParam("latlng", lat + "," + lng)
+                                               .queryParam("result_type", "locality")
+                                               .queryParam("key", apiKey)
+                                               .toUriString();
+
+        final WebClient client = WebClient.create();
+        final JsonNode response = client.get().uri(url).retrieve().bodyToMono(JsonNode.class).block();
+
+        return Optional.ofNullable(response)
+                       .map(r -> r.get("results"))
+                       .filter(results -> results.isArray() && results.size() > 0)
+                       .map(results -> results.get(0))
+                       .map(result -> result.get("formatted_address"))
+                       .map(JsonNode::asText)
+                       .orElseThrow(() -> new RequestException(ResponseStatus.UNABLE_TO_GET_SETTLEMENT_FROM_COORDINATES.getCode()));
+    }
 }

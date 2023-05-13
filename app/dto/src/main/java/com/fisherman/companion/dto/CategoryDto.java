@@ -1,10 +1,15 @@
 package com.fisherman.companion.dto;
 
-import lombok.Builder;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Builder
-public record CategoryDto(
-        Long id,
-        String name
-) {
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class CategoryDto {
+    private Long id;
+    private String name;
 }

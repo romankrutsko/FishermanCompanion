@@ -43,7 +43,7 @@ CREATE TABLE if not exists posts
     status       ENUM ('open', 'closed') NOT NULL DEFAULT 'open',
     FOREIGN KEY (user_id) REFERENCES users (id),
     FOREIGN KEY (category_id) REFERENCES categories (id),
-    INDEX(latitude, longitude, start_date)
+    INDEX(latitude, longitude, start_date, status)
 );
 
 CREATE TABLE if not exists requests

@@ -6,8 +6,7 @@ public record UpdatePostRequest(
         String title,
         String description,
         String startDate,
-        String latitude,
-        String longitude,
+        String settlement,
         String contactInfo
 ) {
 }

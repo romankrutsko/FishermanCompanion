@@ -1,18 +1,23 @@
 package com.fisherman.companion.service;
 
-import java.util.List;
-
-import com.fisherman.companion.dto.PostDto;
-import com.fisherman.companion.dto.request.AllCategoriesPostsRequest;
 import com.fisherman.companion.dto.request.CreatePostRequest;
+import com.fisherman.companion.dto.request.GetPostsInRadiusByCategoryRequest;
 import com.fisherman.companion.dto.request.UpdatePostRequest;
+import com.fisherman.companion.dto.response.GenericListResponse;
+import com.fisherman.companion.dto.response.PostResponse;
 
 import jakarta.servlet.http.HttpServletRequest;
 
 public interface PostService {
-    void createPost(HttpServletRequest request, CreatePostRequest createPostRequest);
+    PostResponse createPost(HttpServletRequest request, CreatePostRequest createPostRequest);
 
-    List<PostDto> findAllPosts(AllCategoriesPostsRequest postsRequest);
+    GenericListResponse<PostResponse> findAllPosts(int take, int skip);
 
     void updatePostInfo(HttpServletRequest request, UpdatePostRequest updatePostRequest);
+
+    GenericListResponse<PostResponse> findPostsNearLocation(GetPostsInRadiusByCategoryRequest getPostsInRadiusRequest);
+
+    void deletePostById(HttpServletRequest request, Long postId);
+
+    GenericListResponse<PostResponse> findUserPostsWithPagination(HttpServletRequest request, int take, int skip);
 }

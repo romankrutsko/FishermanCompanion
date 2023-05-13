@@ -2,18 +2,24 @@ package com.fisherman.companion.dto;
 
 import java.time.LocalDateTime;
 
-import lombok.Builder;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Builder
-public record PostDto(
-        Long id,
-        Long userId,
-        CategoryDto category,
-        String title,
-        String description,
-        LocalDateTime startDate,
-        Double latitude,
-        Double longitude,
-        String contactInfo,
-        PostStatus status
-) {}
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+public class PostDto {
+    private Long id;
+    private Long userId;
+    private CategoryDto category;
+    private String title;
+    private String description;
+    private LocalDateTime startDate;
+    private Double latitude;
+    private Double longitude;
+    private String contactInfo;
+    private PostStatus status;
+}

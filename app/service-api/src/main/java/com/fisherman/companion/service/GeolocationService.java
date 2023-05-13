@@ -7,4 +7,6 @@ public interface GeolocationService {
     GenericListResponse<String> getAutocompleteSettlements(String request);
 
     Geolocation getCoordinates(String settlementName);
+
+    String getSettlementName(Double lat, Double lng);
 }
