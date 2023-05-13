@@ -24,14 +24,13 @@ public class ProfileRepositoryJdbcImpl implements ProfileRepository {
                 VALUES (:userId, :fullName, :avatar, :bio, :location, :contacts)
                 """;
 
-        final Map<String, Object> params = Map.of(
-                "userId", profile.getUserId(),
-                "fullName", profile.getFullName(),
-                "avatar", profile.getAvatar(),
-                "bio", profile.getBio(),
-                "location", profile.getLocation(),
-                "contacts", profile.getContacts()
-        );
+        final MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("userId", profile.getUserId())
+                .addValue("fullName", profile.getFullName())
+                .addValue("avatar", profile.getAvatar())
+                .addValue("bio", profile.getBio())
+                .addValue("location", profile.getLocation())
+                .addValue("contacts", profile.getContacts());
 
         namedParameterJdbcTemplate.update(sql, params);
     }
