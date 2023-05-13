@@ -2,7 +2,7 @@ package com.fisherman.companion.dto.request;
 
 public record UpdatePostRequest(
         Long postId,
-        Long categoryId,
+        String categoryId,
         String title,
         String description,
         String startDate,

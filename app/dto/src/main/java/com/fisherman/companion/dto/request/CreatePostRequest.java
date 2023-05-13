@@ -1,7 +1,7 @@
 package com.fisherman.companion.dto.request;
 
 public record CreatePostRequest(
-        Long categoryId,
+        String categoryId,
         String title,
         String description,
         String startDate,

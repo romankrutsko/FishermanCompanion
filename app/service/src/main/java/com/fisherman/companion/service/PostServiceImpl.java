@@ -58,7 +58,9 @@ public class PostServiceImpl implements PostService {
 
         final CategoryDto category = new CategoryDto();
 
-        category.setId(createPostRequest.categoryId());
+        Long categoryId = Long.valueOf(createPostRequest.categoryId());
+
+        category.setId(categoryId);
 
         final PostDto post = new PostDto();
 
@@ -126,7 +128,9 @@ public class PostServiceImpl implements PostService {
 
         final CategoryDto category = new CategoryDto();
 
-        category.setId(updatePostRequest.categoryId());
+        Long categoryId = Long.valueOf(updatePostRequest.categoryId());
+
+        category.setId(categoryId);
 
         final PostDto post = new PostDto();
 
