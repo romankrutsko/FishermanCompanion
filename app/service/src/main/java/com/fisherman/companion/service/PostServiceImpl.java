@@ -105,11 +105,17 @@ public class PostServiceImpl implements PostService {
 
         final List<PostDto> posts = postRepository.findAllCategoriesPosts(take, skip, timeToShowPosts);
 
-        final List<PostResponse> response = posts.stream()
-                    .map(this::convertToResponse)
-                    .toList();
+        final List<PostResponse> response = getPostResponses(posts);
 
         return GenericListResponse.of(response);
+    }
+
+    private List<PostResponse> getPostResponses(final List<PostDto> posts) {
+        posts.forEach(this::populatePostWithCategoryName);
+
+        return posts.stream()
+                    .map(this::convertToResponse)
+                    .toList();
     }
 
     @Override
@@ -167,9 +173,7 @@ public class PostServiceImpl implements PostService {
                                                                  .filter(post -> calcDistanceByHaversineInKm(lat, lng, post.getLatitude(), post.getLongitude()) <= radius)
                                                                  .toList();
 
-        final List<PostResponse> postsConvertedToResponse = filteredByRadius.stream()
-                                                                 .map(this::convertToResponse)
-                                                                 .toList();
+        final List<PostResponse> postsConvertedToResponse = getPostResponses(filteredByRadius);
 
         return isSortedByRating ? sortByRatingAndStartTime(postsConvertedToResponse) : GenericListResponse.of(postsConvertedToResponse);
     }
@@ -233,9 +237,7 @@ public class PostServiceImpl implements PostService {
 
         final List<PostDto> listOfUserPosts = postRepository.findUserPosts(user.getId(), take, skip);
 
-        final List<PostResponse> response = listOfUserPosts.stream()
-                              .map(this::convertToResponse)
-                              .toList();
+        final List<PostResponse> response = getPostResponses(listOfUserPosts);
 
         return GenericListResponse.of(response);
     }
