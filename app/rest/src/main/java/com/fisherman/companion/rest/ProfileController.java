@@ -1,14 +1,17 @@
 package com.fisherman.companion.rest;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.fisherman.companion.dto.ProfileDto;
 import com.fisherman.companion.dto.request.ProfileRequest;
-import com.fisherman.companion.dto.response.GetProfileResponse;
 import com.fisherman.companion.service.ProfileService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,8 +24,13 @@ public class ProfileController {
     private final ProfileService profileService;
 
     @PostMapping("/create")
-    String createProfile(HttpServletRequest request, @RequestBody ProfileRequest profileRequest) {
+    ProfileDto createProfile(HttpServletRequest request, @RequestBody ProfileRequest profileRequest) {
         return profileService.createUserProfile(request, profileRequest);
+    }
+
+    @PostMapping("/save/avatar")
+    String saveAvatar(HttpServletRequest request, @RequestPart("avatar") MultipartFile avatar) {
+        return profileService.updateProfileAvatar(request, avatar);
     }
 
     @PostMapping("/update")
@@ -30,18 +38,18 @@ public class ProfileController {
         return profileService.updateUserProfile(request, profileRequest);
     }
 
-    @PostMapping("/delete")
-    String deleteProfile(HttpServletRequest request) {
-        return profileService.deleteUserProfile(request);
+    @DeleteMapping("/{profileId}")
+    String deleteProfile(HttpServletRequest request, @PathVariable(value = "profileId") Long profileId) {
+        return profileService.deleteUserProfile(request, profileId);
     }
 
     @GetMapping("/get/my")
-    GetProfileResponse getProfile(HttpServletRequest request) {
+    ProfileDto getProfile(HttpServletRequest request) {
         return profileService.getUserProfile(request);
     }
 
     @GetMapping("/get/{userId}")
-    GetProfileResponse getProfile(@PathVariable(value = "userId") Long userId) {
-        return profileService.getUserProfileById(userId);
+    ProfileDto getProfile(@PathVariable(value = "userId") Long userId) {
+        return profileService.getUserProfileByUserId(userId);
     }
 }

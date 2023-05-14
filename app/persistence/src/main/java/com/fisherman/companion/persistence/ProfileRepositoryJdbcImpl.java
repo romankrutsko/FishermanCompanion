@@ -3,9 +3,13 @@ package com.fisherman.companion.persistence;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
+import java.util.Objects;
+
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import com.fisherman.companion.dto.ProfileDto;
@@ -18,19 +22,37 @@ public class ProfileRepositoryJdbcImpl implements ProfileRepository {
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     @Override
-    public void saveProfile(final ProfileDto profile) {
+    public Long saveProfile(final ProfileDto profile) {
         final String sql = """
-                INSERT INTO profiles (user_id, full_name, avatar, bio, location, contacts)
-                VALUES (:userId, :fullName, :avatar, :bio, :location, :contacts)
+                INSERT INTO profiles (user_id, full_name, bio, location, contacts)
+                VALUES (:userId, :fullName, :bio, :location, :contacts)
                 """;
 
         final MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("userId", profile.getUserId())
                 .addValue("fullName", profile.getFullName())
-                .addValue("avatar", profile.getAvatar())
                 .addValue("bio", profile.getBio())
                 .addValue("location", profile.getLocation())
                 .addValue("contacts", profile.getContacts());
+
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        namedParameterJdbcTemplate.update(sql, params, keyHolder);
+
+        return Objects.requireNonNull(keyHolder.getKey()).longValue();
+    }
+
+    @Override
+    public void updateProfileAvatar(final Long userId, final String avatar) {
+        final String sql = """
+                UPDATE profiles
+                SET avatar = :avatar
+                WHERE user_id = :userId
+                """;
+
+        final MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("userId", userId)
+                .addValue("avatar", avatar);
 
         namedParameterJdbcTemplate.update(sql, params);
     }
@@ -68,7 +90,6 @@ public class ProfileRepositoryJdbcImpl implements ProfileRepository {
         final String sql = """
                 UPDATE profiles
                 SET full_name = COALESCE(:fullName, full_name),
-                    avatar = COALESCE(:avatar, avatar),
                     bio = COALESCE(:bio, bio),
                     location = COALESCE(:location, location),
                     contacts = COALESCE(:contacts, contacts)
@@ -78,7 +99,6 @@ public class ProfileRepositoryJdbcImpl implements ProfileRepository {
         final MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("userId", profile.getUserId())
                 .addValue("fullName", profile.getFullName())
-                .addValue("avatar", profile.getAvatar())
                 .addValue("bio", profile.getBio())
                 .addValue("location", profile.getLocation())
                 .addValue("contacts", profile.getContacts());
@@ -87,12 +107,12 @@ public class ProfileRepositoryJdbcImpl implements ProfileRepository {
     }
 
     @Override
-    public void deleteProfileByUserId(final Long userId) {
+    public void deleteProfileByUserId(final Long profileId) {
         final String sql = """
-                DELETE FROM profiles WHERE user_id = :userId
+                DELETE FROM profiles WHERE id = :id
                 """;
 
-        namedParameterJdbcTemplate.update(sql, Map.of("userId", userId));
+        namedParameterJdbcTemplate.update(sql, Map.of("id", profileId));
     }
 
     private static class ProfileMapper implements RowMapper<ProfileDto> {
