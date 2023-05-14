@@ -1,5 +1,7 @@
 package com.fisherman.companion.rest;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,7 +22,7 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/create")
-    String createUser(@RequestBody CreateUserRequest request) {
+    Long createUser(@RequestBody CreateUserRequest request) {
         return userService.createUser(request);
     }
 
@@ -34,8 +36,8 @@ public class UserController {
         return userService.updateUsername(request, usernameRequest, response);
     }
 
-    @PostMapping("/delete")
-    String deleteUser(HttpServletRequest request, HttpServletResponse response) {
-        return userService.deleteUser(request, response);
+    @DeleteMapping("/{userId}")
+    String deleteUser(HttpServletRequest request, HttpServletResponse response, @PathVariable(value = "userId") Long userId) {
+        return userService.deleteUser(request, response, userId);
     }
 }

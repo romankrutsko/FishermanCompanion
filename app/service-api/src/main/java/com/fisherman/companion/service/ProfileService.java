@@ -1,18 +1,22 @@
 package com.fisherman.companion.service;
 
+import org.springframework.web.multipart.MultipartFile;
+
+import com.fisherman.companion.dto.ProfileDto;
 import com.fisherman.companion.dto.request.ProfileRequest;
-import com.fisherman.companion.dto.response.GetProfileResponse;
 
 import jakarta.servlet.http.HttpServletRequest;
 
 public interface ProfileService {
-    String createUserProfile(HttpServletRequest request, ProfileRequest profileRequest);
+    ProfileDto createUserProfile(HttpServletRequest request, ProfileRequest profileRequest);
+
+    String updateProfileAvatar(HttpServletRequest request, MultipartFile avatar);
 
     String updateUserProfile(HttpServletRequest request, ProfileRequest profileRequest);
 
-    GetProfileResponse getUserProfile(HttpServletRequest request);
+    ProfileDto getUserProfile(HttpServletRequest request);
 
-    GetProfileResponse getUserProfileById(Long id);
+    ProfileDto getUserProfileByUserId(Long id);
 
-    String deleteUserProfile(HttpServletRequest request);
+    String deleteUserProfile(HttpServletRequest request, Long profileId);
 }

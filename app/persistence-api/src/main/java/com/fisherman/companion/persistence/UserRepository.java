@@ -5,7 +5,7 @@ import java.util.List;
 import com.fisherman.companion.dto.UserDto;
 
 public interface UserRepository {
-    void saveUser(final UserDto user);
+    Long saveUser(final UserDto user);
 
     boolean isUsernameNotUnique(String username);
 

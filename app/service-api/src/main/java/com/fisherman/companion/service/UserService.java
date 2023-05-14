@@ -8,11 +8,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 public interface UserService {
-    String createUser(CreateUserRequest createUserRequest);
+    Long createUser(CreateUserRequest createUserRequest);
 
     String updateUserPassword(HttpServletRequest request, UpdatePasswordRequest passwordRequest);
 
     String updateUsername(HttpServletRequest request, UpdateUsernameRequest usernameRequest, HttpServletResponse response);
 
-    String deleteUser(HttpServletRequest request, HttpServletResponse response);
+    String deleteUser(HttpServletRequest request, HttpServletResponse response, Long userId);
 }

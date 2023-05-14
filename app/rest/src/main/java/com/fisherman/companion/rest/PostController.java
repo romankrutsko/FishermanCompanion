@@ -1,5 +1,6 @@
 package com.fisherman.companion.rest;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -51,7 +52,7 @@ public class PostController {
         return postService.findAllPosts(take, skip);
     }
 
-    @PostMapping("/delete/{postId}")
+    @DeleteMapping("/{postId}")
     void deletePostById(HttpServletRequest request, @PathVariable(value = "postId") Long postId) {
         postService.deletePostById(request, postId);
     }

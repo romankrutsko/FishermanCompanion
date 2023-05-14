@@ -26,7 +26,7 @@ public class UserServiceImpl implements UserService {
     private final HashService hashService;
 
     @Override
-    public String createUser(final CreateUserRequest createUserRequest) {
+    public Long createUser(final CreateUserRequest createUserRequest) {
         final String username = createUserRequest.username();
         final String email = createUserRequest.email();
         final String hashedPassword = hashService.hash(createUserRequest.password());
@@ -51,16 +51,14 @@ public class UserServiceImpl implements UserService {
         return !emailValidator.isValid(email);
     }
 
-    private String saveUser(final CreateUserRequest createUserRequest, final String hashedPassword) {
+    private Long saveUser(final CreateUserRequest createUserRequest, final String hashedPassword) {
         final UserDto userDto = new UserDto();
         userDto.setEmail(createUserRequest.email());
         userDto.setPassword(hashedPassword);
         userDto.setUsername(createUserRequest.username());
         userDto.setRole(UserRole.USER.name().toLowerCase());
 
-        userRepository.saveUser(userDto);
-
-        return ResponseStatus.USER_CREATED_SUCCESSFULLY.getCode();
+        return userRepository.saveUser(userDto);
     }
 
     @Override
@@ -114,12 +112,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String deleteUser(final HttpServletRequest request, HttpServletResponse response) {
+    public String deleteUser(final HttpServletRequest request, HttpServletResponse response, Long userId) {
         final UserDto user = cookieService.verifyAuthentication(request);
 
-        return Optional.ofNullable(user)
-                       .map(userDto -> deleteUserById(request, userDto.getId(), response))
-                       .orElseThrow(() -> new UnauthorizedException(ResponseStatus.USER_CANNOT_BE_FOUND.getCode()));
+        if (!user.getId().equals(userId)) {
+            throw new RequestException(ResponseStatus.UNABLE_DELETE_USER.getCode());
+        }
+
+        return deleteUserById(request, userId, response);
     }
 
     private String deleteUserById(final HttpServletRequest request, final Long id, HttpServletResponse response) {
