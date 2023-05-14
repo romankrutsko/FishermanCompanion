@@ -15,6 +15,7 @@ public enum ResponseStatus {
     USERNAME_CHANGED_SUCCESSFULLY("Username changed successfully"),
     USER_PROFILE_UPDATED_SUCCESSFULLY("User profile updates successfully"),
     USER_DELETED_SUCCESSFULLY("User was deleted successfully"),
+    UNABLE_DELETE_USER("User wasn't deleted because user id passed is not the id of current user"),
     PROFILE_DELETED_SUCCESSFULLY("User profile was deleted successfully"),
     UNABLE_DELETE_PROFILE("User profile wasn't deleted because profile id passed is not current user profile id"),
     UNAUTHORIZED("User is not authorized"),

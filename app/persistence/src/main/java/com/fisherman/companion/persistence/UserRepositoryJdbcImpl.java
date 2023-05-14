@@ -4,10 +4,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import com.fisherman.companion.dto.UserDto;
@@ -20,20 +23,23 @@ public class UserRepositoryJdbcImpl implements UserRepository {
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     @Override
-    public void saveUser(final UserDto user) {
+    public Long saveUser(final UserDto user) {
         final String sql = """
                     INSERT INTO users (username, email, password, role)
                     VALUES (:username, :email, :password, :role)
                 """;
 
-        final Map<String, Object> params = Map.of(
-                "username", user.getUsername(),
-                "email", user.getEmail(),
-                "password", user.getPassword(),
-                "role", user.getRole()
-        );
+        final MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("username", user.getUsername())
+                .addValue("email", user.getEmail())
+                .addValue("password", user.getPassword())
+                .addValue("role", user.getRole());
 
-        namedParameterJdbcTemplate.update(sql, params);
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        namedParameterJdbcTemplate.update(sql, params, keyHolder);
+
+        return Objects.requireNonNull(keyHolder.getKey()).longValue();
     }
     @Override
     public boolean isUsernameNotUnique(String username) {
