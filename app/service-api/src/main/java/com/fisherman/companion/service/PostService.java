@@ -13,7 +13,7 @@ public interface PostService {
 
     GenericListResponse<PostResponse> findAllPosts(int take, int skip);
 
-    void updatePostInfo(HttpServletRequest request, UpdatePostRequest updatePostRequest);
+    void updatePostInfo(HttpServletRequest request, UpdatePostRequest updatePostRequest, Long postId);
 
     GenericListResponse<PostResponse> findPostsNearLocation(GetPostsInRadiusByCategoryRequest getPostsInRadiusRequest);
 

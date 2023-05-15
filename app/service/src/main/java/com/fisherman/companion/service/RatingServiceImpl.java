@@ -59,7 +59,7 @@ public class RatingServiceImpl implements RatingService {
         return getDetailedRating(user.getId());
     }
 
-    private GenericListResponse<GetDetailedRatingResponse> getDetailedRating(Long userId) {
+    private GenericListResponse<GetDetailedRatingResponse> getDetailedRating(final Long userId) {
         final List<RatingDto> ratings = ratingRepository.getRatingsWithCommentsForUser(userId);
 
         return GenericListResponse.of(ratings.stream().map(this::populateWithUsername).toList());
@@ -71,6 +71,8 @@ public class RatingServiceImpl implements RatingService {
         final UserDto ratedByUser = userRepository.findUserById(userId);
 
         return GetDetailedRatingResponse.builder()
+                                        .id(ratingDto.id())
+                                        .userId(ratingDto.userId())
                                         .userIdRatedBy(ratingDto.ratedBy())
                                         .usernameRatedBy(ratedByUser.getUsername())
                                         .rating(ratingDto.rating())
@@ -81,5 +83,12 @@ public class RatingServiceImpl implements RatingService {
     @Override
     public GenericListResponse<GetDetailedRatingResponse> getDetailedRatingsByUserId(final Long userId) {
         return getDetailedRating(userId);
+    }
+
+    @Override
+    public void deleteRatingById(final HttpServletRequest request, final Long ratingId) {
+        cookieService.verifyAuthentication(request);
+
+        ratingRepository.deleteRatingById(ratingId);
     }
 }

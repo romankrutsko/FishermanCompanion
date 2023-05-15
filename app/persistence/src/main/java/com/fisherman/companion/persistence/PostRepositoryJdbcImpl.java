@@ -144,16 +144,12 @@ public class PostRepositoryJdbcImpl implements PostRepository {
     }
 
     @Override
-    public void deleteById(final Long id, final Long userId) {
+    public void deleteById(final Long id) {
         final String sql = """
-                DELETE FROM posts WHERE id = :id and user_id = :userId
+                DELETE FROM posts WHERE id = :id
                 """;
 
-        Map<String, Object> params = Map.of(
-                "id", id,
-                "userId", userId
-        );
-        namedParameterJdbcTemplate.update(sql, params);
+        namedParameterJdbcTemplate.update(sql, Map.of("id", id));
     }
 
     private static class PostMapper implements RowMapper<PostDto> {

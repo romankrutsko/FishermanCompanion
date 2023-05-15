@@ -50,8 +50,7 @@ public class RatingRepositoryJdbcImpl implements RatingRepository {
     @Override
     public List<RatingDto> getRatingsWithCommentsForUser(final Long userId) {
         final String sql = """
-                SELECT rated_by, rating, comment
-                FROM ratings
+                SELECT * FROM ratings
                 WHERE user_id = :userId
                 ORDER BY id DESC
                 """;
@@ -59,10 +58,21 @@ public class RatingRepositoryJdbcImpl implements RatingRepository {
         return namedParameterJdbcTemplate.query(sql, Map.of("userId", userId), new RatingMapper());
     }
 
+    @Override
+    public void deleteRatingById(final Long ratingId) {
+        final String sql = """
+                DELETE FROM ratings WHERE id = :ratingId
+                """;
+
+        namedParameterJdbcTemplate.update(sql, Map.of("ratingId", ratingId));
+    }
+
     private static class RatingMapper implements RowMapper<RatingDto> {
         @Override
         public RatingDto mapRow(final ResultSet rs, final int rowNum) throws SQLException {
             return RatingDto.builder()
+                            .id(rs.getLong("id"))
+                            .userId(rs.getLong("user_id"))
                             .ratedBy(rs.getLong("rated_by"))
                             .rating(rs.getInt("rating"))
                             .comment(rs.getString("comment"))

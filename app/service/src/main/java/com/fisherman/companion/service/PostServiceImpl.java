@@ -119,17 +119,17 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public void updatePostInfo(final HttpServletRequest request, final UpdatePostRequest updatePostRequest) {
+    public void updatePostInfo(final HttpServletRequest request, final UpdatePostRequest updatePostRequest, final Long postId) {
         cookieService.verifyAuthentication(request);
 
-        final PostDto post = mapUpdateRequestToPostDto(updatePostRequest);
+        final PostDto post = mapUpdateRequestToPostDto(updatePostRequest, postId);
 
         populatePostWithCategoryName(post);
 
         postRepository.updatePostById(post);
     }
 
-    private PostDto mapUpdateRequestToPostDto(final UpdatePostRequest updatePostRequest) {
+    private PostDto mapUpdateRequestToPostDto(final UpdatePostRequest updatePostRequest, final Long postId) {
         final Geolocation geolocation = geolocationService.getCoordinates(updatePostRequest.settlement());
 
         final CategoryDto category = new CategoryDto();
@@ -142,7 +142,7 @@ public class PostServiceImpl implements PostService {
 
         String startDate = updatePostRequest.startDate();
 
-        post.setId(updatePostRequest.postId());
+        post.setId(postId);
         post.setCategory(category);
         post.setTitle(updatePostRequest.title());
         post.setDescription(updatePostRequest.description());
@@ -226,9 +226,9 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public void deletePostById(final HttpServletRequest request, final Long postId) {
-        final UserDto user = cookieService.verifyAuthentication(request);
+        cookieService.verifyAuthentication(request);
 
-        postRepository.deleteById(postId, user.getId());
+        postRepository.deleteById(postId);
     }
 
     @Override

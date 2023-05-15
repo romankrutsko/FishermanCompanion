@@ -93,11 +93,11 @@ public class ProfileRepositoryJdbcImpl implements ProfileRepository {
                     bio = COALESCE(:bio, bio),
                     location = COALESCE(:location, location),
                     contacts = COALESCE(:contacts, contacts)
-                WHERE user_id = :userId
+                WHERE id = :id
                 """;
 
         final MapSqlParameterSource params = new MapSqlParameterSource()
-                .addValue("userId", profile.getUserId())
+                .addValue("id", profile.getId())
                 .addValue("fullName", profile.getFullName())
                 .addValue("bio", profile.getBio())
                 .addValue("location", profile.getLocation())

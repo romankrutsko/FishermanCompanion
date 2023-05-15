@@ -17,5 +17,5 @@ public interface PostRepository {
 
     void updatePostById(PostDto postDto);
 
-    void deleteById(Long id, Long userId);
+    void deleteById(Long id);
 }

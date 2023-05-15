@@ -113,11 +113,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public String deleteUser(final HttpServletRequest request, HttpServletResponse response, Long userId) {
-        final UserDto user = cookieService.verifyAuthentication(request);
-
-        if (!user.getId().equals(userId)) {
-            throw new RequestException(ResponseStatus.UNABLE_DELETE_USER.getCode());
-        }
+        cookieService.verifyAuthentication(request);
 
         return deleteUserById(request, userId, response);
     }

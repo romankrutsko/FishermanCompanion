@@ -1,5 +1,6 @@
 package com.fisherman.companion.rest;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -44,5 +45,10 @@ public class RatingController {
     @GetMapping("/detailed/{userId}")
     GenericListResponse<GetDetailedRatingResponse> getUserDetailedRatings(@PathVariable(value = "userId") Long userId) {
         return ratingService.getDetailedRatingsByUserId(userId);
+    }
+
+    @DeleteMapping("/{ratingId}")
+    void getUserDetailedRatings(HttpServletRequest request, @PathVariable(value = "ratingId") Long ratingId) {
+        ratingService.deleteRatingById(request, ratingId);
     }
 }

@@ -33,14 +33,9 @@ public class ProfileController {
         return profileService.updateProfileAvatar(request, avatar);
     }
 
-    @PostMapping("/update")
-    String updateProfile(HttpServletRequest request, @RequestBody ProfileRequest profileRequest) {
-        return profileService.updateUserProfile(request, profileRequest);
-    }
-
-    @DeleteMapping("/{profileId}")
-    String deleteProfile(HttpServletRequest request, @PathVariable(value = "profileId") Long profileId) {
-        return profileService.deleteUserProfile(request, profileId);
+    @PostMapping("/update/{profileId}")
+    String updateProfile(HttpServletRequest request, @RequestBody ProfileRequest profileRequest, @PathVariable(value = "profileId") Long profileId) {
+        return profileService.updateUserProfile(request, profileRequest, profileId);
     }
 
     @GetMapping("/get/my")
@@ -51,5 +46,10 @@ public class ProfileController {
     @GetMapping("/get/{userId}")
     ProfileDto getProfile(@PathVariable(value = "userId") Long userId) {
         return profileService.getUserProfileByUserId(userId);
+    }
+
+    @DeleteMapping("/{profileId}")
+    String deleteProfile(HttpServletRequest request, @PathVariable(value = "profileId") Long profileId) {
+        return profileService.deleteUserProfile(request, profileId);
     }
 }

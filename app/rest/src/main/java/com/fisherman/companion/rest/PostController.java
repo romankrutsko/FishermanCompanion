@@ -36,9 +36,9 @@ public class PostController {
         return postService.findUserPostsWithPagination(request, take, skip);
     }
 
-    @PostMapping("/update")
-    void updatePost(HttpServletRequest request, @RequestBody final UpdatePostRequest updatePostRequest) {
-        postService.updatePostInfo(request, updatePostRequest);
+    @PostMapping("/update/{postId}")
+    void updatePost(HttpServletRequest request, @RequestBody final UpdatePostRequest updatePostRequest, @PathVariable(value = "postId") Long postId) {
+        postService.updatePostInfo(request, updatePostRequest, postId);
     }
 
     @PostMapping("/get/by-location")
