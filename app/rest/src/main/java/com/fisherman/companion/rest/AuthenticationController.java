@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fisherman.companion.dto.request.LoginRequest;
+import com.fisherman.companion.dto.response.LoginResponse;
 import com.fisherman.companion.service.AuthenticationService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,7 +20,7 @@ public class AuthenticationController {
     private final AuthenticationService authenticationService;
 
     @PostMapping("/login")
-    String login(@RequestBody LoginRequest request, HttpServletResponse response) {
+    LoginResponse login(@RequestBody LoginRequest request, HttpServletResponse response) {
         return authenticationService.login(request, response);
     }
 

@@ -3,6 +3,7 @@ package com.fisherman.companion.service;
 import org.springframework.stereotype.Service;
 import com.fisherman.companion.dto.UserDto;
 import com.fisherman.companion.dto.request.LoginRequest;
+import com.fisherman.companion.dto.response.LoginResponse;
 import com.fisherman.companion.dto.response.ResponseStatus;
 import com.fisherman.companion.persistence.UserRepository;
 import com.fisherman.companion.service.exception.RequestException;
@@ -19,7 +20,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final HashService hashService;
 
     @Override
-    public String login(final LoginRequest loginRequest, HttpServletResponse response) {
+    public LoginResponse login(final LoginRequest loginRequest, HttpServletResponse response) {
         final String hashedPassword = hashService.hash(loginRequest.password());
 
         final Long userId = userRepository.loginUser(loginRequest.username(), hashedPassword);
@@ -30,7 +31,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         final UserDto userDto = userRepository.findUserById(userId);
 
-        return cookieService.updateCookies(userDto, response);
+        final String cookies = cookieService.updateCookies(userDto, response);
+
+        return LoginResponse.builder()
+                            .id(userDto.getId())
+                            .token(cookies)
+                            .role(userDto.getRole())
+                            .build();
     }
 
     @Override

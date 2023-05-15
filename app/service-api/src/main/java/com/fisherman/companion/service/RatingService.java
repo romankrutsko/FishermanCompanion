@@ -17,4 +17,6 @@ public interface RatingService {
     GenericListResponse<GetDetailedRatingResponse> getMyDetailedRatings(HttpServletRequest request);
 
     GenericListResponse<GetDetailedRatingResponse> getDetailedRatingsByUserId(Long userId);
+
+    void deleteRatingById(HttpServletRequest request, Long ratingId);
 }

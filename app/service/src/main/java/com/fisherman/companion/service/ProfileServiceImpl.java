@@ -1,6 +1,5 @@
 package com.fisherman.companion.service;
 
-import java.util.Objects;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
@@ -28,13 +27,24 @@ public class ProfileServiceImpl implements ProfileService {
     public ProfileDto createUserProfile(final HttpServletRequest request, final ProfileRequest profileRequest) {
         final UserDto user = cookieService.verifyAuthentication(request);
 
-        final ProfileDto profile = mapToProfileDto(profileRequest, user);
+        final ProfileDto profile = mapToProfileDto(profileRequest, user.getId(), null);
 
         Long profileId = profileRepository.saveProfile(profile);
 
         profile.setId(profileId);
 
         return profile;
+    }
+
+    private ProfileDto mapToProfileDto(final ProfileRequest request, final Long userId, final Long profileId) {
+        return ProfileDto.builder()
+                         .id(profileId)
+                         .userId(userId)
+                         .fullName(request.fullName())
+                         .bio(request.bio())
+                         .location(request.location())
+                         .contacts(request.contacts())
+                         .build();
     }
 
     @Override
@@ -60,21 +70,11 @@ public class ProfileServiceImpl implements ProfileService {
                                      .orElse(null);
     }
 
-    private ProfileDto mapToProfileDto(final ProfileRequest request, final UserDto user) {
-        return ProfileDto.builder()
-                         .userId(user.getId())
-                         .fullName(request.fullName())
-                         .bio(request.bio())
-                         .location(request.location())
-                         .contacts(request.contacts())
-                         .build();
-    }
-
     @Override
-    public String updateUserProfile(final HttpServletRequest request, final ProfileRequest profileRequest) {
-        final UserDto user = cookieService.verifyAuthentication(request);
+    public String updateUserProfile(final HttpServletRequest request, final ProfileRequest profileRequest, final Long profileId) {
+        cookieService.verifyAuthentication(request);
 
-        final ProfileDto profileDto = mapToProfileDto(profileRequest, user);
+        final ProfileDto profileDto = mapToProfileDto(profileRequest, null, profileId);
 
         profileRepository.updateProfile(profileDto);
 
@@ -95,13 +95,7 @@ public class ProfileServiceImpl implements ProfileService {
 
     @Override
     public String deleteUserProfile(final HttpServletRequest request, final Long profileId) {
-        UserDto user = cookieService.verifyAuthentication(request);
-
-        ProfileDto profileToDelete = profileRepository.findProfileByUserId(user.getId());
-
-        if (!Objects.equals(profileToDelete.getId(), profileId)) {
-            throw new RequestException(ResponseStatus.UNABLE_DELETE_PROFILE.getCode());
-        }
+        cookieService.verifyAuthentication(request);
 
         profileRepository.deleteProfileByUserId(profileId);
 

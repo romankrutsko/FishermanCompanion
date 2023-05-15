@@ -4,6 +4,8 @@ import lombok.Builder;
 
 @Builder
 public record GetDetailedRatingResponse(
+        Long id,
+        Long userId,
         Long userIdRatedBy,
         String usernameRatedBy,
         int rating,

@@ -12,7 +12,7 @@ public interface ProfileService {
 
     String updateProfileAvatar(HttpServletRequest request, MultipartFile avatar);
 
-    String updateUserProfile(HttpServletRequest request, ProfileRequest profileRequest);
+    String updateUserProfile(HttpServletRequest request, ProfileRequest profileRequest, Long profileId);
 
     ProfileDto getUserProfile(HttpServletRequest request);
 

@@ -12,4 +12,6 @@ public interface RatingRepository {
     Double getAverageRatingForUser(Long userId);
 
     List<RatingDto> getRatingsWithCommentsForUser(Long userId);
+
+    void deleteRatingById(Long ratingId);
 }
