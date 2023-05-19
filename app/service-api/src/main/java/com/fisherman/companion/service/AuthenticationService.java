@@ -8,6 +8,5 @@ import jakarta.servlet.http.HttpServletResponse;
 
 public interface AuthenticationService {
     LoginResponse login(final LoginRequest loginRequest, HttpServletResponse response);
-
-    String logout(HttpServletRequest request, HttpServletResponse response);
+    String logout(HttpServletRequest request);
 }

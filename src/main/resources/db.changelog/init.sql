@@ -6,8 +6,11 @@ CREATE TABLE if not exists users
 (
     id       INT UNSIGNED           NOT NULL AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(255)           NOT NULL UNIQUE,
-    email    VARCHAR(255)           NOT NULL UNIQUE,
     password VARCHAR(255)           NOT NULL,
+    avatar    VARCHAR(255),
+    bio       TEXT,
+    location  VARCHAR(255),
+    contacts  VARCHAR(255),
     role     ENUM ('user', 'admin') NOT NULL DEFAULT 'user'
 );
 
@@ -51,6 +54,7 @@ CREATE TABLE if not exists requests
     id      INT UNSIGNED                                         NOT NULL AUTO_INCREMENT PRIMARY KEY,
     user_id INT UNSIGNED                                         NOT NULL,
     post_id INT UNSIGNED                                         NOT NULL,
+    comment TEXT                                                 NULL,
     status  ENUM ('pending', 'accepted', 'canceled', 'declined') NOT NULL DEFAULT 'pending',
     FOREIGN KEY (user_id) REFERENCES users (id),
     FOREIGN KEY (post_id) REFERENCES posts (id)

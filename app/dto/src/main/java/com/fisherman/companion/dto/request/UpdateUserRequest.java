@@ -1,7 +1,7 @@
 package com.fisherman.companion.dto.request;
 
-public record ProfileRequest (
-        String fullName,
+public record UpdateUserRequest(
+        String password,
         String bio,
         String location,
         String contacts

@@ -1,4 +1,4 @@
-package com.fisherman.companion.dto;
+package com.fisherman.companion.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,11 +9,13 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserDto {
+public class UserResponse {
     private Long id;
     private String username;
-    private String email;
-    private String password;
+    private String avatar;
+    private String bio;
+    private String location;
+    private String contacts;
+    private Double averageRating;
     private String role;
-
 }

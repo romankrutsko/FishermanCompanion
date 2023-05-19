@@ -1,21 +1,19 @@
 package com.fisherman.companion.persistence;
 
-import java.util.List;
-
-import com.fisherman.companion.dto.UserDto;
+import com.fisherman.companion.dto.User;
 
 public interface UserRepository {
-    Long saveUser(final UserDto user);
+    Long saveUser(final User user);
+
+    void updateUserAvatar(Long id, String avatar);
 
     boolean isUsernameNotUnique(String username);
+    User findUserByUsername(String username);
 
-    boolean isEmailNotUnique(String email);
+    User findUserById(final Long id);
 
-    UserDto findUserByUsername(String username);
+    void updateUser(User user, Long id);
 
-    UserDto findUserById(final Long id);
-    List<UserDto> findAllUsers();
-    void updateUser(final UserDto user);
     void deleteUserById(final Long id);
 
     Long loginUser(final String username, final String password);

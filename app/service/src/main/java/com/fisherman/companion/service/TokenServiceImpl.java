@@ -2,40 +2,33 @@ package com.fisherman.companion.service;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
-import java.time.Duration;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 import java.util.Optional;
 import javax.crypto.spec.SecretKeySpec;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
-import com.fisherman.companion.dto.UserDto;
+
+import com.fisherman.companion.dto.SignTokenParams;
+import com.fisherman.companion.dto.User;
 import com.fisherman.companion.dto.response.ResponseStatus;
 import com.fisherman.companion.persistence.UserRepository;
 import com.fisherman.companion.service.exception.UnauthorizedException;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class CookieServiceImpl implements CookieService {
-    public static final String TOKEN = "token";
+public class TokenServiceImpl implements TokenService {
     @Value("${token.expiration.time:86400}")
     private Integer maxAge;
     @Value("${jwt.secret}")
     private String secret;
-
-    @Value("${cookies.set.secure}")
-    private boolean secure;
 
     private final UserRepository userRepository;
 
@@ -65,20 +58,20 @@ public class CookieServiceImpl implements CookieService {
     }
 
     @Override
-    public UserDto verifyAuthentication(HttpServletRequest request) {
+    public User verifyAuthentication(HttpServletRequest request) {
         if (isNotAuthenticated(request)) {
             throw new UnauthorizedException(ResponseStatus.UNAUTHORIZED.getCode());
         }
-        return getUserFromCookies(request);
+        return getUserFromToken(request);
     }
 
     private boolean isNotAuthenticated(final HttpServletRequest request) {
-        String token = getToken(request);
+        final String token = getTokenFromRequest(request);
 
         return token == null || !isTokenValid(token);
     }
 
-    private UserDto getUserFromCookies(final HttpServletRequest request) {
+    private User getUserFromToken(final HttpServletRequest request) {
         final String username = findUsernameFromToken(request);
 
         return userRepository.findUserByUsername(username);
@@ -96,77 +89,31 @@ public class CookieServiceImpl implements CookieService {
         return jwtParser.parseClaimsJws(token).getBody().getSubject();
     }
 
-
-    @Override
-    public String getToken(HttpServletRequest request) {
-        return getTokenFromRequest(request);
-    }
-
     private String getTokenFromRequest(HttpServletRequest request) {
-        return getCookieValue(request);
-    }
+        final String authorizationHeaderValue = request.getHeader("Authorization");
 
-    private Cookie getCookie(final HttpServletRequest request) {
-        final List<Cookie> cookieList = Optional.ofNullable(request.getCookies())
-                                                .map(Arrays::asList)
-                                                .orElse(List.of());
-
-        return cookieList.stream()
-                         .filter(cookies -> cookies.getName().equals(CookieServiceImpl.TOKEN))
-                         .findFirst()
-                         .orElse(null);
-    }
-
-    private String getCookieValue(final HttpServletRequest request) {
-        Cookie cookie = getCookie(request);
-
-        return Optional.ofNullable(cookie).map(Cookie::getValue).orElse(null);
+        return Optional.ofNullable(authorizationHeaderValue).map(s -> s.substring(7)).orElse(null);
     }
 
     @Override
-    public String updateCookies(final UserDto userDto, final HttpServletResponse response) {
-        final String token = signToken(userDto.getUsername());
-
-        final int maxAgeInSeconds = maxAge / 1000;
-
-        ResponseCookie cookie = ResponseCookie.from(TOKEN, token)
-                                              .httpOnly(true)
-                                              .secure(secure)
-                                              .path("/")
-                                              .maxAge(Duration.ofSeconds(maxAgeInSeconds))
-                                              .sameSite("None")
-                                              .build();
-
-        response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-
-        return token;
+    public String generateToken(final SignTokenParams params, final HttpServletResponse response) {
+        return signToken(params);
     }
 
-    private String signToken(final String username) {
+    private String signToken(final SignTokenParams params) {
         final Date currentTime = new Date();
         final Date expirationDate = getExpirationDate(currentTime, maxAge);
         final Key key = getKey(secret);
 
+        final Claims claims = Jwts.claims().setSubject(params.username());
+        claims.put("id", params.id());
+        claims.put("role", params.role());
+
         return Jwts.builder()
-                   .setSubject(username)
+                   .setClaims(claims)
                    .setIssuedAt(currentTime)
                    .setExpiration(expirationDate)
                    .signWith(key)
                    .compact();
-    }
-
-    @Override
-    public void deleteAllCookies(HttpServletRequest request, HttpServletResponse response) {
-        Cookie token = getCookie(request);
-
-        if (token != null) {
-            deleteCookie(token, response);
-        }
-    }
-
-    public void deleteCookie(final Cookie cookie, final HttpServletResponse response) {
-        cookie.setValue("");
-        cookie.setMaxAge(0);
-        response.addCookie(cookie);
     }
 }
