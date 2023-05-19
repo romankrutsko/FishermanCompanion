@@ -4,12 +4,17 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import com.fisherman.companion.dto.BoundingBoxDimensions;
+import com.fisherman.companion.dto.GetPostsPaginationParams;
 import com.fisherman.companion.dto.PostDto;
 
 public interface PostRepository {
     Long savePost(PostDto postDto);
 
-    List<PostDto> findAllCategoriesPosts(int take, int skip, LocalDateTime timeToFilter);
+    PostDto findPostById(Long postId);
+
+    List<PostDto> findAllCategoriesPosts(GetPostsPaginationParams params);
+
+    List<PostDto> findPostsByCategory(GetPostsPaginationParams paginationParams, Long categoryId);
 
     List<PostDto> findPostsInBoundingBoxByCategory(BoundingBoxDimensions boxDimensions, LocalDateTime timeFrom, LocalDateTime timeTo, Long categoryId);
 

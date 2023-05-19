@@ -10,14 +10,17 @@ import org.springframework.stereotype.Service;
 import com.fisherman.companion.dto.BoundingBoxDimensions;
 import com.fisherman.companion.dto.CategoryDto;
 import com.fisherman.companion.dto.Geolocation;
+import com.fisherman.companion.dto.GetPostsPaginationParams;
 import com.fisherman.companion.dto.PostDto;
 import com.fisherman.companion.dto.PostStatus;
 import com.fisherman.companion.dto.UserDto;
 import com.fisherman.companion.dto.request.CreatePostRequest;
+import com.fisherman.companion.dto.request.GetPostsByCategoryRequest;
 import com.fisherman.companion.dto.request.GetPostsInRadiusByCategoryRequest;
 import com.fisherman.companion.dto.request.UpdatePostRequest;
 import com.fisherman.companion.dto.response.GenericListResponse;
 import com.fisherman.companion.dto.response.PostResponse;
+import com.fisherman.companion.dto.response.UserResponse;
 import com.fisherman.companion.persistence.CategoryRepository;
 import com.fisherman.companion.persistence.PostRepository;
 import com.fisherman.companion.persistence.RatingRepository;
@@ -31,6 +34,7 @@ public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
     private final CategoryRepository categoryRepository;
     private final RatingRepository ratingRepository;
+    private final UserService userService;
     private final TokenService tokenService;
     private final GeolocationService geolocationService;
 
@@ -44,7 +48,7 @@ public class PostServiceImpl implements PostService {
 
         final PostDto post = mapCreateRequestToPostDto(createPostRequest, user.id());
 
-        Long postId = postRepository.savePost(post);
+        final Long postId = postRepository.savePost(post);
 
         populatePostWithCategoryName(post);
 
@@ -58,7 +62,7 @@ public class PostServiceImpl implements PostService {
 
         final CategoryDto category = new CategoryDto();
 
-        Long categoryId = Long.valueOf(createPostRequest.categoryId());
+        final Long categoryId = Long.valueOf(createPostRequest.categoryId());
 
         category.setId(categoryId);
 
@@ -84,11 +88,13 @@ public class PostServiceImpl implements PostService {
     }
 
     private PostResponse convertToResponse(final PostDto postDto) {
+        final UserResponse user = userService.findUserById(postDto.getUserId());
+
         final String settlement = geolocationService.getSettlementName(postDto.getLatitude(), postDto.getLongitude());
 
         return PostResponse.builder()
                            .id(postDto.getId())
-                           .userId(postDto.getUserId())
+                           .user(user)
                            .category(postDto.getCategory())
                            .title(postDto.getTitle())
                            .description(postDto.getDescription())
@@ -103,7 +109,9 @@ public class PostServiceImpl implements PostService {
     public GenericListResponse<PostResponse> findAllPosts(final int take, final int skip) {
         final LocalDateTime timeToShowPosts = LocalDateTime.now().plusHours(2);
 
-        final List<PostDto> posts = postRepository.findAllCategoriesPosts(take, skip, timeToShowPosts);
+        final GetPostsPaginationParams paginationParams = new GetPostsPaginationParams(skip, take, timeToShowPosts);
+
+        final List<PostDto> posts = postRepository.findAllCategoriesPosts(paginationParams);
 
         final List<PostResponse> response = getPostResponses(posts);
 
@@ -119,7 +127,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public void updatePostInfo(final HttpServletRequest request, final UpdatePostRequest updatePostRequest, final Long postId) {
+    public PostResponse updatePostInfo(final HttpServletRequest request, final UpdatePostRequest updatePostRequest, final Long postId) {
         tokenService.verifyAuthentication(request);
 
         final PostDto post = mapUpdateRequestToPostDto(updatePostRequest, postId);
@@ -127,6 +135,12 @@ public class PostServiceImpl implements PostService {
         populatePostWithCategoryName(post);
 
         postRepository.updatePostById(post);
+
+        final PostDto updatedPost = postRepository.findPostById(postId);
+
+        populatePostWithCategoryName(updatedPost);
+
+        return convertToResponse(updatedPost);
     }
 
     private PostDto mapUpdateRequestToPostDto(final UpdatePostRequest updatePostRequest, final Long postId) {
@@ -134,13 +148,13 @@ public class PostServiceImpl implements PostService {
 
         final CategoryDto category = new CategoryDto();
 
-        Long categoryId = Long.valueOf(updatePostRequest.categoryId());
+        final Long categoryId = Long.valueOf(updatePostRequest.categoryId());
 
         category.setId(categoryId);
 
         final PostDto post = new PostDto();
 
-        String startDate = updatePostRequest.startDate();
+        final String startDate = updatePostRequest.startDate();
 
         post.setId(postId);
         post.setCategory(category);
@@ -152,6 +166,20 @@ public class PostServiceImpl implements PostService {
         post.setContactInfo(updatePostRequest.contactInfo());
 
         return post;
+    }
+
+    @Override
+    public GenericListResponse<PostResponse> findPostsByCategory(final GetPostsByCategoryRequest getPostsByCategoryRequest, int skip, int take) {
+        final boolean isSortedByRating = getPostsByCategoryRequest.sortByUserRating();
+        final LocalDateTime timeToShowPosts = LocalDateTime.now().plusHours(2);
+
+        final GetPostsPaginationParams paginationParams = new GetPostsPaginationParams(skip, take, timeToShowPosts);
+
+        final List<PostDto> posts = postRepository.findPostsByCategory(paginationParams, getPostsByCategoryRequest.categoryId());
+
+        final List<PostResponse> postResponses = getPostResponses(posts);
+
+        return isSortedByRating ? sortByRatingAndStartTime(postResponses) : GenericListResponse.of(postResponses);
     }
 
     @Override
@@ -217,7 +245,7 @@ public class PostServiceImpl implements PostService {
     public GenericListResponse<PostResponse> sortByRatingAndStartTime(final List<PostResponse> postList) {
         final List<PostResponse> response = postList.stream()
                        .sorted(Comparator.comparing(PostResponse::startDate)
-                                         .thenComparingDouble(post -> Optional.ofNullable(ratingRepository.getAverageRatingForUser(post.userId()))
+                                         .thenComparingDouble(post -> Optional.ofNullable(ratingRepository.getAverageRatingForUser(post.user().getId()))
                                                                               .orElse(0.0)))
                        .toList();
 
@@ -232,10 +260,10 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public GenericListResponse<PostResponse> findUserPostsWithPagination(final HttpServletRequest request, final int take, final int skip) {
-        final UserDto user = tokenService.verifyAuthentication(request);
+    public GenericListResponse<PostResponse> findUserPostsWithPagination(final HttpServletRequest request, final Long userId, final int take, final int skip) {
+        tokenService.verifyAuthentication(request);
 
-        final List<PostDto> listOfUserPosts = postRepository.findUserPosts(user.id(), take, skip);
+        final List<PostDto> listOfUserPosts = postRepository.findUserPosts(userId, take, skip);
 
         final List<PostResponse> response = getPostResponses(listOfUserPosts);
 

@@ -10,7 +10,7 @@ import lombok.Builder;
 @Builder
 public record PostResponse(
         Long id,
-        Long userId,
+        UserResponse user,
         CategoryDto category,
         String title,
         String description,
