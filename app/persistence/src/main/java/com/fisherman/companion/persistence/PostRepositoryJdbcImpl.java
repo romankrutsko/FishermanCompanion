@@ -17,6 +17,7 @@ import org.springframework.stereotype.Repository;
 
 import com.fisherman.companion.dto.BoundingBoxDimensions;
 import com.fisherman.companion.dto.CategoryDto;
+import com.fisherman.companion.dto.GetPostsPaginationParams;
 import com.fisherman.companion.dto.PostDto;
 import com.fisherman.companion.dto.PostStatus;
 
@@ -53,19 +54,53 @@ public class PostRepositoryJdbcImpl implements PostRepository {
     }
 
     @Override
-    public List<PostDto> findAllCategoriesPosts(final int take, final int skip, final LocalDateTime timeToFilter) {
+    public PostDto findPostById(final Long postId) {
         final String sql = """
-                SELECT * FROM posts p
-                WHERE p.status = 'open' AND p.start_date >= :startDate
-                ORDER BY p.start_date
+                SELECT * FROM posts
+                WHERE id = :id
+                """;
+
+        return namedParameterJdbcTemplate.query(sql, Map.of("id", postId), new PostMapper())
+                                         .stream()
+                                         .findFirst()
+                                         .orElse(null);
+    }
+
+    @Override
+    public List<PostDto> findAllCategoriesPosts(final GetPostsPaginationParams paginationParams) {
+        final String sql = """
+                SELECT * FROM posts
+                WHERE status = 'open' AND start_date >= :startDate
+                ORDER BY start_date
                 LIMIT :take
                 OFFSET :skip
                 """;
 
         final Map<String, Object> params = Map.of(
-                "startDate", Timestamp.valueOf(timeToFilter),
-                "take", take,
-                "skip", skip
+                "startDate", Timestamp.valueOf(paginationParams.timeToFilter()),
+                "take", paginationParams.take(),
+                "skip", paginationParams.skip()
+        );
+
+        return namedParameterJdbcTemplate.query(sql, params, new PostMapper());
+    }
+
+
+    @Override
+    public List<PostDto> findPostsByCategory(final GetPostsPaginationParams paginationParams, final Long categoryId) {
+        final String sql = """
+                SELECT * FROM posts
+                WHERE status = 'open' AND start_date >= :startDate AND category_id = :category
+                ORDER BY start_date
+                LIMIT :take
+                OFFSET :skip
+                """;
+
+        final Map<String, Object> params = Map.of(
+                "startDate", Timestamp.valueOf(paginationParams.timeToFilter()),
+                "take", paginationParams.take(),
+                "skip", paginationParams.skip(),
+                "category", categoryId
         );
 
         return namedParameterJdbcTemplate.query(sql, params, new PostMapper());
