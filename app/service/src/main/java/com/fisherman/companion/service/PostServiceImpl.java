@@ -12,7 +12,7 @@ import com.fisherman.companion.dto.CategoryDto;
 import com.fisherman.companion.dto.Geolocation;
 import com.fisherman.companion.dto.PostDto;
 import com.fisherman.companion.dto.PostStatus;
-import com.fisherman.companion.dto.User;
+import com.fisherman.companion.dto.UserDto;
 import com.fisherman.companion.dto.request.CreatePostRequest;
 import com.fisherman.companion.dto.request.GetPostsInRadiusByCategoryRequest;
 import com.fisherman.companion.dto.request.UpdatePostRequest;
@@ -40,7 +40,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public PostResponse createPost(final HttpServletRequest request, final CreatePostRequest createPostRequest) {
-        final User user = tokenService.verifyAuthentication(request);
+        final UserDto user = tokenService.verifyAuthentication(request);
 
         final PostDto post = mapCreateRequestToPostDto(createPostRequest, user.id());
 
@@ -233,7 +233,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public GenericListResponse<PostResponse> findUserPostsWithPagination(final HttpServletRequest request, final int take, final int skip) {
-        final User user = tokenService.verifyAuthentication(request);
+        final UserDto user = tokenService.verifyAuthentication(request);
 
         final List<PostDto> listOfUserPosts = postRepository.findUserPosts(user.id(), take, skip);
 

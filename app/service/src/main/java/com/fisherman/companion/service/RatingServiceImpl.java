@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.fisherman.companion.dto.RatingDto;
-import com.fisherman.companion.dto.User;
+import com.fisherman.companion.dto.UserDto;
 import com.fisherman.companion.dto.request.CreateRatingRequest;
 import com.fisherman.companion.dto.response.GenericListResponse;
 import com.fisherman.companion.dto.response.GetDetailedRatingResponse;
@@ -26,7 +26,7 @@ public class RatingServiceImpl implements RatingService {
 
     @Override
     public String rateUser(final HttpServletRequest request, final CreateRatingRequest ratingRequest) {
-        final User user = tokenService.verifyAuthentication(request);
+        final UserDto user = tokenService.verifyAuthentication(request);
 
         ratingRepository.createRating(ratingRequest, user.id());
 
@@ -56,7 +56,7 @@ public class RatingServiceImpl implements RatingService {
     private GetDetailedRatingResponse populateWithUsername(final RatingDto ratingDto) {
         final Long userId = ratingDto.ratedBy();
 
-        final User ratedByUser = userRepository.findUserById(userId);
+        final UserDto ratedByUser = userRepository.findUserById(userId);
 
         return GetDetailedRatingResponse.builder()
                                         .id(ratingDto.id())

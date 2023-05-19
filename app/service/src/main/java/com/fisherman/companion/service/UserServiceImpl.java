@@ -5,7 +5,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.fisherman.companion.dto.User;
+import com.fisherman.companion.dto.UserDto;
 import com.fisherman.companion.dto.UserRole;
 import com.fisherman.companion.dto.request.CreateUserRequest;
 import com.fisherman.companion.dto.request.UpdateUserRequest;
@@ -40,14 +40,14 @@ public class UserServiceImpl implements UserService {
     }
 
     private Long saveUser(final CreateUserRequest createUserRequest, final String hashedPassword) {
-        final User user = User.builder()
-                              .username(createUserRequest.username())
-                              .password(hashedPassword)
-                              .bio(createUserRequest.bio())
-                              .location(createUserRequest.location())
-                              .contacts(createUserRequest.contacts())
-                              .role(UserRole.USER.name())
-                              .build();
+        final UserDto user = UserDto.builder()
+                                    .username(createUserRequest.username())
+                                    .password(hashedPassword)
+                                    .bio(createUserRequest.bio())
+                                    .location(createUserRequest.location())
+                                    .contacts(createUserRequest.contacts())
+                                    .role(UserRole.USER.name())
+                                    .build();
 
         return userRepository.saveUser(user);
     }
@@ -77,12 +77,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponse findUserById(final Long userId) {
-        final User user = userRepository.findUserById(userId);
+        final UserDto user = userRepository.findUserById(userId);
 
         return populateUserResponseWithAvgRating(user);
     }
 
-    private UserResponse populateUserResponseWithAvgRating(final User user) {
+    private UserResponse populateUserResponseWithAvgRating(final UserDto user) {
         final UserResponse userResponse = mapUserToResponse(user);
 
         final Double averageRating = ratingService.getUserAverageRatingByUserId(user.id());
@@ -92,7 +92,7 @@ public class UserServiceImpl implements UserService {
         return userResponse;
     }
 
-    private UserResponse mapUserToResponse(final User user) {
+    private UserResponse mapUserToResponse(final UserDto user) {
         return UserResponse.builder()
                            .id(user.id())
                            .username(user.username())
@@ -106,19 +106,19 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponse updateUser(final HttpServletRequest request, final UpdateUserRequest updateUserRequest, final Long id) {
-        final User user = tokenService.verifyAuthentication(request);
+        final UserDto user = tokenService.verifyAuthentication(request);
         String hashedPassword = null;
 
         if (updateUserRequest.password() != null) {
             hashedPassword = hashService.hash(updateUserRequest.password());
         }
 
-        final User userToUpdate = User.builder()
-                                      .password(hashedPassword)
-                                      .bio(updateUserRequest.bio())
-                                      .location(updateUserRequest.location())
-                                      .contacts(updateUserRequest.contacts())
-                                      .build();
+        final UserDto userToUpdate = UserDto.builder()
+                                            .password(hashedPassword)
+                                            .bio(updateUserRequest.bio())
+                                            .location(updateUserRequest.location())
+                                            .contacts(updateUserRequest.contacts())
+                                            .build();
 
         userRepository.updateUser(userToUpdate, id);
 
@@ -126,7 +126,7 @@ public class UserServiceImpl implements UserService {
     }
 
     private UserResponse populateUserResponse(final String username) {
-        final User updatedUser = userRepository.findUserByUsername(username);
+        final UserDto updatedUser = userRepository.findUserByUsername(username);
 
         return populateUserResponseWithAvgRating(updatedUser);
     }

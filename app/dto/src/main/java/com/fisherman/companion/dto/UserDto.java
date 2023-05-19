@@ -3,7 +3,7 @@ package com.fisherman.companion.dto;
 import lombok.Builder;
 
 @Builder
-public record User(
+public record UserDto(
         Long id,
         String username,
         String password,

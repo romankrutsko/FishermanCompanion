@@ -12,7 +12,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
-import com.fisherman.companion.dto.User;
+import com.fisherman.companion.dto.UserDto;
 
 import lombok.RequiredArgsConstructor;
 
@@ -22,7 +22,7 @@ public class UserRepositoryJdbcImpl implements UserRepository {
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     @Override
-    public Long saveUser(final User user) {
+    public Long saveUser(final UserDto user) {
         final String sql = """
                     INSERT INTO users (username, password, bio, location, contacts, role)
                     VALUES (:username, :password, :bio, :location, :contacts, :role)
@@ -68,7 +68,7 @@ public class UserRepositoryJdbcImpl implements UserRepository {
     }
 
     @Override
-    public User findUserByUsername(final String username) {
+    public UserDto findUserByUsername(final String username) {
         final String sql = """
                     SELECT *
                     FROM users
@@ -82,7 +82,7 @@ public class UserRepositoryJdbcImpl implements UserRepository {
     }
 
     @Override
-    public User findUserById(final Long id) {
+    public UserDto findUserById(final Long id) {
         final String sql = """
                     SELECT *
                     FROM users
@@ -96,7 +96,7 @@ public class UserRepositoryJdbcImpl implements UserRepository {
     }
 
     @Override
-    public void updateUser(final User user, final Long id) {
+    public void updateUser(final UserDto user, final Long id) {
         final String sql = """
                     UPDATE users
                     SET password = COALESCE(:password, password),
@@ -142,18 +142,18 @@ public class UserRepositoryJdbcImpl implements UserRepository {
                                          .orElse(null);
     }
 
-    private static class UserMapper implements RowMapper<User> {
+    private static class UserMapper implements RowMapper<UserDto> {
         @Override
-        public User mapRow(final ResultSet rs, final int rowNum) throws SQLException {
-            return User.builder()
-                       .id(rs.getLong("id"))
-                       .username(rs.getString("username"))
-                       .avatar(rs.getString("avatar"))
-                       .bio(rs.getString("bio"))
-                       .location(rs.getString("location"))
-                       .contacts(rs.getString("contacts"))
-                       .role(rs.getString("role"))
-                       .build();
+        public UserDto mapRow(final ResultSet rs, final int rowNum) throws SQLException {
+            return UserDto.builder()
+                          .id(rs.getLong("id"))
+                          .username(rs.getString("username"))
+                          .avatar(rs.getString("avatar"))
+                          .bio(rs.getString("bio"))
+                          .location(rs.getString("location"))
+                          .contacts(rs.getString("contacts"))
+                          .role(rs.getString("role"))
+                          .build();
         }
     }
 

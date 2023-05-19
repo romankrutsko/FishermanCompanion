@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.fisherman.companion.dto.SignTokenParams;
-import com.fisherman.companion.dto.User;
+import com.fisherman.companion.dto.UserDto;
 import com.fisherman.companion.dto.response.ResponseStatus;
 import com.fisherman.companion.persistence.UserRepository;
 import com.fisherman.companion.service.exception.UnauthorizedException;
@@ -58,7 +58,7 @@ public class TokenServiceImpl implements TokenService {
     }
 
     @Override
-    public User verifyAuthentication(HttpServletRequest request) {
+    public UserDto verifyAuthentication(HttpServletRequest request) {
         if (isNotAuthenticated(request)) {
             throw new UnauthorizedException(ResponseStatus.UNAUTHORIZED.getCode());
         }
@@ -71,7 +71,7 @@ public class TokenServiceImpl implements TokenService {
         return token == null || !isTokenValid(token);
     }
 
-    private User getUserFromToken(final HttpServletRequest request) {
+    private UserDto getUserFromToken(final HttpServletRequest request) {
         final String username = findUsernameFromToken(request);
 
         return userRepository.findUserByUsername(username);
