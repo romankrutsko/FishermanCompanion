@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fisherman.companion.dto.request.CreateRatingRequest;
 import com.fisherman.companion.dto.response.GenericListResponse;
-import com.fisherman.companion.dto.response.GetAverageRatingResponse;
 import com.fisherman.companion.dto.response.GetDetailedRatingResponse;
 import com.fisherman.companion.service.RatingService;
 
@@ -23,26 +22,11 @@ import lombok.RequiredArgsConstructor;
 public class RatingController {
     private final RatingService ratingService;
 
-    @PostMapping("/rate")
+    @PostMapping
     String rateUser(HttpServletRequest request, @RequestBody CreateRatingRequest ratingRequest) {
         return ratingService.rateUser(request, ratingRequest);
     }
-
-    @GetMapping("/average/my")
-    GetAverageRatingResponse getMyAverageRating(HttpServletRequest request) {
-        return ratingService.getMyAverageRating(request);
-    }
-
-    @GetMapping("/average/{userId}")
-    GetAverageRatingResponse getUserAverageRating(@PathVariable(value = "userId") Long userId) {
-        return ratingService.getUserAverageRatingByUserId(userId);
-    }
-    @GetMapping("/detailed/my")
-    GenericListResponse<GetDetailedRatingResponse> getMyDetailedRatings(HttpServletRequest request) {
-        return ratingService.getMyDetailedRatings(request);
-    }
-
-    @GetMapping("/detailed/{userId}")
+    @GetMapping("/{userId}")
     GenericListResponse<GetDetailedRatingResponse> getUserDetailedRatings(@PathVariable(value = "userId") Long userId) {
         return ratingService.getDetailedRatingsByUserId(userId);
     }

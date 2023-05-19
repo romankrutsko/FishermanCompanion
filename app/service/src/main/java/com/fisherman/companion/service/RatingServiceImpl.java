@@ -8,7 +8,6 @@ import com.fisherman.companion.dto.RatingDto;
 import com.fisherman.companion.dto.UserDto;
 import com.fisherman.companion.dto.request.CreateRatingRequest;
 import com.fisherman.companion.dto.response.GenericListResponse;
-import com.fisherman.companion.dto.response.GetAverageRatingResponse;
 import com.fisherman.companion.dto.response.GetDetailedRatingResponse;
 import com.fisherman.companion.dto.response.ResponseStatus;
 import com.fisherman.companion.persistence.RatingRepository;
@@ -23,40 +22,29 @@ public class RatingServiceImpl implements RatingService {
     private final RatingRepository ratingRepository;
 
     private final UserRepository userRepository;
-    private final CookieService cookieService;
+    private final TokenService tokenService;
 
     @Override
     public String rateUser(final HttpServletRequest request, final CreateRatingRequest ratingRequest) {
-        final UserDto user = cookieService.verifyAuthentication(request);
+        final UserDto user = tokenService.verifyAuthentication(request);
 
-        ratingRepository.createRating(ratingRequest, user.getId());
+        ratingRepository.createRating(ratingRequest, user.id());
 
         return ResponseStatus.USER_RATED_SUCCESSFULLY.getCode();
     }
 
     @Override
-    public GetAverageRatingResponse getMyAverageRating(final HttpServletRequest request) {
-        final UserDto user = cookieService.verifyAuthentication(request);
-
-        return getAverageRating(user.getId());
-    }
-
-    @Override
-    public GetAverageRatingResponse getUserAverageRatingByUserId(final Long userId) {
+    public Double getUserAverageRatingByUserId(final Long userId) {
         return getAverageRating(userId);
     }
 
-    private GetAverageRatingResponse getAverageRating(final Long userId) {
-        final Double averageRatingForUser = ratingRepository.getAverageRatingForUser(userId);
-
-        return new GetAverageRatingResponse(averageRatingForUser);
+    private Double getAverageRating(final Long userId) {
+        return ratingRepository.getAverageRatingForUser(userId);
     }
 
     @Override
-    public GenericListResponse<GetDetailedRatingResponse> getMyDetailedRatings(final HttpServletRequest request) {
-        final UserDto user = cookieService.verifyAuthentication(request);
-
-        return getDetailedRating(user.getId());
+    public GenericListResponse<GetDetailedRatingResponse> getDetailedRatingsByUserId(final Long userId) {
+        return getDetailedRating(userId);
     }
 
     private GenericListResponse<GetDetailedRatingResponse> getDetailedRating(final Long userId) {
@@ -74,20 +62,15 @@ public class RatingServiceImpl implements RatingService {
                                         .id(ratingDto.id())
                                         .userId(ratingDto.userId())
                                         .userIdRatedBy(ratingDto.ratedBy())
-                                        .usernameRatedBy(ratedByUser.getUsername())
+                                        .usernameRatedBy(ratedByUser.username())
                                         .rating(ratingDto.rating())
                                         .comment(ratingDto.comment())
                                         .build();
     }
 
     @Override
-    public GenericListResponse<GetDetailedRatingResponse> getDetailedRatingsByUserId(final Long userId) {
-        return getDetailedRating(userId);
-    }
-
-    @Override
     public void deleteRatingById(final HttpServletRequest request, final Long ratingId) {
-        cookieService.verifyAuthentication(request);
+        tokenService.verifyAuthentication(request);
 
         ratingRepository.deleteRatingById(ratingId);
     }

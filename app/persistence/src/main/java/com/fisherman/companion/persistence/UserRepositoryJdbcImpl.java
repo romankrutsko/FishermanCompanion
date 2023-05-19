@@ -2,7 +2,6 @@ package com.fisherman.companion.persistence;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -25,15 +24,17 @@ public class UserRepositoryJdbcImpl implements UserRepository {
     @Override
     public Long saveUser(final UserDto user) {
         final String sql = """
-                    INSERT INTO users (username, email, password, role)
-                    VALUES (:username, :email, :password, :role)
+                    INSERT INTO users (username, password, bio, location, contacts, role)
+                    VALUES (:username, :password, :bio, :location, :contacts, :role)
                 """;
 
         final MapSqlParameterSource params = new MapSqlParameterSource()
-                .addValue("username", user.getUsername())
-                .addValue("email", user.getEmail())
-                .addValue("password", user.getPassword())
-                .addValue("role", user.getRole());
+                .addValue("username", user.username())
+                .addValue("password", user.password())
+                .addValue("bio", user.bio())
+                .addValue("location", user.location())
+                .addValue("contacts", user.contacts())
+                .addValue("role", user.role());
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
@@ -41,20 +42,27 @@ public class UserRepositoryJdbcImpl implements UserRepository {
 
         return Objects.requireNonNull(keyHolder.getKey()).longValue();
     }
+
+    @Override
+    public void updateUserAvatar(final Long id, final String avatar) {
+        final String sql = """
+                UPDATE users
+                SET avatar = :avatar
+                WHERE id = :id
+                """;
+
+        final MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("id", id)
+                .addValue("avatar", avatar);
+
+        namedParameterJdbcTemplate.update(sql, params);
+    }
+
     @Override
     public boolean isUsernameNotUnique(String username) {
         final String sql = "SELECT COUNT(*) FROM users WHERE username = :username";
 
         final Integer count = namedParameterJdbcTemplate.queryForObject(sql, Map.of("username", username), Integer.class);
-
-        return (count != null && count > 0);
-    }
-
-    @Override
-    public boolean isEmailNotUnique(String email) {
-        final String sql = "SELECT COUNT(*) FROM users WHERE email = :email";
-
-        final Integer count = namedParameterJdbcTemplate.queryForObject(sql, Map.of("email", email), Integer.class);
 
         return (count != null && count > 0);
     }
@@ -88,31 +96,22 @@ public class UserRepositoryJdbcImpl implements UserRepository {
     }
 
     @Override
-    public List<UserDto> findAllUsers() {
-        final String sql = """
-                    SELECT *
-                    FROM users
-                """;
-        return namedParameterJdbcTemplate.query(sql, new UserMapper());
-    }
-
-    @Override
-    public void updateUser(final UserDto user) {
+    public void updateUser(final UserDto user, final Long id) {
         final String sql = """
                     UPDATE users
-                    SET username = COALESCE(:usermame, username),
-                        email = COALESCE(:email, email),
-                        password = COALESCE(:password, password),
-                        role = COALESCE(:role, role)
+                    SET password = COALESCE(:password, password),
+                        bio = COALESCE(:bio, bio),
+                        location = COALESCE(:location, location),
+                        contacts = COALESCE(:contacts, contacts)
                     WHERE id = :id
                 """;
 
         final MapSqlParameterSource params = new MapSqlParameterSource()
-                .addValue("id", user.getId())
-                .addValue("username", user.getUsername())
-                .addValue("email", user.getEmail())
-                .addValue("password", user.getPassword())
-                .addValue("role", user.getRole());
+                .addValue("id", id)
+                .addValue("password", user.password())
+                .addValue("bio", user.bio())
+                .addValue("location", user.location())
+                .addValue("contacts", user.contacts());
 
         namedParameterJdbcTemplate.update(sql, params);
     }
@@ -120,8 +119,7 @@ public class UserRepositoryJdbcImpl implements UserRepository {
     @Override
     public void deleteUserById(final Long id) {
         final String sql = """
-                    DELETE u, p FROM users u LEFT JOIN profiles p ON u.id = p.user_id
-                    WHERE u.id = :id
+                    DELETE FROM users WHERE id = :id
                 """;
 
         namedParameterJdbcTemplate.update(sql, Map.of("id", id));
@@ -130,7 +128,7 @@ public class UserRepositoryJdbcImpl implements UserRepository {
     @Override
     public Long loginUser(final String username, final String password) {
         final String sql = """
-                SELECT id
+                SELECT *
                 FROM users
                 WHERE username = :username AND password = :password
                 """;
@@ -150,8 +148,10 @@ public class UserRepositoryJdbcImpl implements UserRepository {
             return UserDto.builder()
                           .id(rs.getLong("id"))
                           .username(rs.getString("username"))
-                          .email(rs.getString("email"))
-                          .password(rs.getString("password"))
+                          .avatar(rs.getString("avatar"))
+                          .bio(rs.getString("bio"))
+                          .location(rs.getString("location"))
+                          .contacts(rs.getString("contacts"))
                           .role(rs.getString("role"))
                           .build();
         }

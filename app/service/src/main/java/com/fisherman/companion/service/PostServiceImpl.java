@@ -31,7 +31,7 @@ public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
     private final CategoryRepository categoryRepository;
     private final RatingRepository ratingRepository;
-    private final CookieService cookieService;
+    private final TokenService tokenService;
     private final GeolocationService geolocationService;
 
     private static final double EARTH_RADIUS_KM = 6371.0;
@@ -40,9 +40,9 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public PostResponse createPost(final HttpServletRequest request, final CreatePostRequest createPostRequest) {
-        final UserDto user = cookieService.verifyAuthentication(request);
+        final UserDto user = tokenService.verifyAuthentication(request);
 
-        final PostDto post = mapCreateRequestToPostDto(createPostRequest, user.getId());
+        final PostDto post = mapCreateRequestToPostDto(createPostRequest, user.id());
 
         Long postId = postRepository.savePost(post);
 
@@ -120,7 +120,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public void updatePostInfo(final HttpServletRequest request, final UpdatePostRequest updatePostRequest, final Long postId) {
-        cookieService.verifyAuthentication(request);
+        tokenService.verifyAuthentication(request);
 
         final PostDto post = mapUpdateRequestToPostDto(updatePostRequest, postId);
 
@@ -226,16 +226,16 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public void deletePostById(final HttpServletRequest request, final Long postId) {
-        cookieService.verifyAuthentication(request);
+        tokenService.verifyAuthentication(request);
 
         postRepository.deleteById(postId);
     }
 
     @Override
     public GenericListResponse<PostResponse> findUserPostsWithPagination(final HttpServletRequest request, final int take, final int skip) {
-        final UserDto user = cookieService.verifyAuthentication(request);
+        final UserDto user = tokenService.verifyAuthentication(request);
 
-        final List<PostDto> listOfUserPosts = postRepository.findUserPosts(user.getId(), take, skip);
+        final List<PostDto> listOfUserPosts = postRepository.findUserPosts(user.id(), take, skip);
 
         final List<PostResponse> response = getPostResponses(listOfUserPosts);
 
