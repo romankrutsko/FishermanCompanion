@@ -32,7 +32,7 @@ public class RatingController {
     }
 
     @DeleteMapping("/{ratingId}")
-    void getUserDetailedRatings(HttpServletRequest request, @PathVariable(value = "ratingId") Long ratingId) {
+    void deleteUserRating(HttpServletRequest request, @PathVariable(value = "ratingId") Long ratingId) {
         ratingService.deleteRatingById(request, ratingId);
     }
 }

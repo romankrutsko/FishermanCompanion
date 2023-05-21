@@ -4,10 +4,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import com.fisherman.companion.dto.RequestStatus;
@@ -21,19 +24,23 @@ public class RequestsRepositoryImpl implements RequestsRepository {
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     @Override
-    public void createRequest(final RequestDto request) {
+    public Long createRequest(final RequestDto request) {
         final String sql = """
             INSERT INTO requests (user_id, post_id, comment, status)
             VALUES (:userId, :postId, :comment, :status)
             """;
 
-        final MapSqlParameterSource parameters = new MapSqlParameterSource()
+        final MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("userId", request.getUserId())
                 .addValue("postId", request.getPostId())
                 .addValue("comment", request.getComment())
                 .addValue("status", request.getStatus().getCode());
 
-        namedParameterJdbcTemplate.update(sql, parameters);
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        namedParameterJdbcTemplate.update(sql, params, keyHolder);
+
+        return Objects.requireNonNull(keyHolder.getKey()).longValue();
     }
 
     @Override
@@ -116,7 +123,7 @@ public class RequestsRepositoryImpl implements RequestsRepository {
                           .userId(rs.getLong("user_id"))
                           .postId(rs.getLong("post_id"))
                           .comment(rs.getString("comment"))
-                          .status(RequestStatus.valueOf(rs.getString("status")))
+                          .status(RequestStatus.valueOf(rs.getString("status").toUpperCase()))
                           .build();
         }
     }
