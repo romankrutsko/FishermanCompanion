@@ -14,18 +14,6 @@ CREATE TABLE if not exists users
     role     ENUM ('user', 'admin') NOT NULL DEFAULT 'user'
 );
 
-CREATE TABLE if not exists profiles
-(
-    id        INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    user_id   INT UNSIGNED NOT NULL UNIQUE,
-    full_name VARCHAR(255),
-    avatar    VARCHAR(255),
-    bio       TEXT,
-    location  VARCHAR(255),
-    contacts  VARCHAR(255),
-    FOREIGN KEY (user_id) REFERENCES users (id)
-);
-
 CREATE TABLE if not exists categories
 (
     id   INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -43,10 +31,9 @@ CREATE TABLE if not exists posts
     latitude     DECIMAL(10, 8)           NULL,
     longitude    DECIMAL(11, 8)           NULL,
     contact_info TEXT,
-    status       ENUM ('open', 'closed') NOT NULL DEFAULT 'open',
     FOREIGN KEY (user_id) REFERENCES users (id),
     FOREIGN KEY (category_id) REFERENCES categories (id),
-    INDEX(latitude, longitude, start_date, status)
+    INDEX(latitude, longitude, start_date)
 );
 
 CREATE TABLE if not exists requests
@@ -55,7 +42,7 @@ CREATE TABLE if not exists requests
     user_id INT UNSIGNED                                         NOT NULL,
     post_id INT UNSIGNED                                         NOT NULL,
     comment TEXT                                                 NULL,
-    status  ENUM ('pending', 'accepted', 'canceled', 'declined') NOT NULL DEFAULT 'pending',
+    status  ENUM ('pending', 'accepted', 'declined') NOT NULL DEFAULT 'pending',
     FOREIGN KEY (user_id) REFERENCES users (id),
     FOREIGN KEY (post_id) REFERENCES posts (id)
 );

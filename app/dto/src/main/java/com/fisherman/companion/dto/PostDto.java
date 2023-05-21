@@ -21,5 +21,4 @@ public class PostDto {
     private Double latitude;
     private Double longitude;
     private String contactInfo;
-    private PostStatus status;
 }
