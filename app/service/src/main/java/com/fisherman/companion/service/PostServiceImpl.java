@@ -12,7 +12,6 @@ import com.fisherman.companion.dto.CategoryDto;
 import com.fisherman.companion.dto.Geolocation;
 import com.fisherman.companion.dto.GetPostsPaginationParams;
 import com.fisherman.companion.dto.PostDto;
-import com.fisherman.companion.dto.PostStatus;
 import com.fisherman.companion.dto.UserDto;
 import com.fisherman.companion.dto.request.CreatePostRequest;
 import com.fisherman.companion.dto.request.GetPostsByCategoryRequest;
@@ -76,7 +75,6 @@ public class PostServiceImpl implements PostService {
         post.setLatitude(geolocation.latitude());
         post.setLongitude(geolocation.longitude());
         post.setContactInfo(createPostRequest.contactInfo());
-        post.setStatus(PostStatus.OPEN);
 
         return post;
     }
@@ -101,7 +99,6 @@ public class PostServiceImpl implements PostService {
                            .startDate(postDto.getStartDate())
                            .settlement(settlement)
                            .contactInfo(postDto.getContactInfo())
-                           .status(postDto.getStatus())
                            .build();
     }
 

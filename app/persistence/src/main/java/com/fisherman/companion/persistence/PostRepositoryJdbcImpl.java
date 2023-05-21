@@ -19,7 +19,6 @@ import com.fisherman.companion.dto.BoundingBoxDimensions;
 import com.fisherman.companion.dto.CategoryDto;
 import com.fisherman.companion.dto.GetPostsPaginationParams;
 import com.fisherman.companion.dto.PostDto;
-import com.fisherman.companion.dto.PostStatus;
 
 import lombok.RequiredArgsConstructor;
 
@@ -31,8 +30,8 @@ public class PostRepositoryJdbcImpl implements PostRepository {
     @Override
     public Long savePost(final PostDto postDto) {
         final String sql = """
-                INSERT INTO posts (user_id, category_id, title, description, start_date, latitude, longitude, contact_info, status)
-                VALUES (:userId, :categoryId, :title, :description, :startDate, :latitude, :longitude, :contactInfo, :status)
+                INSERT INTO posts (user_id, category_id, title, description, start_date, latitude, longitude, contact_info)
+                VALUES (:userId, :categoryId, :title, :description, :startDate, :latitude, :longitude, :contactInfo)
                 """;
 
         final MapSqlParameterSource params = new MapSqlParameterSource()
@@ -43,8 +42,7 @@ public class PostRepositoryJdbcImpl implements PostRepository {
                 .addValue("startDate", postDto.getStartDate())
                 .addValue("latitude", postDto.getLatitude())
                 .addValue("longitude", postDto.getLongitude())
-                .addValue("contactInfo", postDto.getContactInfo())
-                .addValue("status", postDto.getStatus().name());
+                .addValue("contactInfo", postDto.getContactInfo());
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
@@ -70,7 +68,7 @@ public class PostRepositoryJdbcImpl implements PostRepository {
     public List<PostDto> findAllCategoriesPosts(final GetPostsPaginationParams paginationParams) {
         final String sql = """
                 SELECT * FROM posts
-                WHERE status = 'open' AND start_date >= :startDate
+                WHERE start_date >= :startDate
                 ORDER BY start_date
                 LIMIT :take
                 OFFSET :skip
@@ -90,7 +88,7 @@ public class PostRepositoryJdbcImpl implements PostRepository {
     public List<PostDto> findPostsByCategory(final GetPostsPaginationParams paginationParams, final Long categoryId) {
         final String sql = """
                 SELECT * FROM posts
-                WHERE status = 'open' AND start_date >= :startDate AND category_id = :category
+                WHERE start_date >= :startDate AND category_id = :category
                 ORDER BY start_date
                 LIMIT :take
                 OFFSET :skip
@@ -110,8 +108,7 @@ public class PostRepositoryJdbcImpl implements PostRepository {
     public List<PostDto> findPostsInBoundingBoxByCategory(final BoundingBoxDimensions boxDimensions, final LocalDateTime from, final LocalDateTime to, final Long categoryId) {
         String sql = """
                 SELECT * FROM posts
-                WHERE status = 'open'
-                    AND start_date BETWEEN :from AND :to
+                WHERE start_date BETWEEN :from AND :to
                     AND latitude BETWEEN :minLat AND :maxLat
                     AND longitude BETWEEN :minLng AND :maxLng
                     AND category_id = :category
@@ -161,7 +158,7 @@ public class PostRepositoryJdbcImpl implements PostRepository {
                     latitude = COALESCE(:latitude, latitude),
                     longitude = COALESCE(:longitude, longitude),
                     contact_info = COALESCE(:contactInfo, contact_info)
-                WHERE id = :id AND status = 'open'
+                WHERE id = :id
                 """;
 
         final MapSqlParameterSource params = new MapSqlParameterSource()
@@ -205,7 +202,6 @@ public class PostRepositoryJdbcImpl implements PostRepository {
             post.setLatitude(rs.getDouble("latitude"));
             post.setLongitude(rs.getDouble("longitude"));
             post.setContactInfo(rs.getString("contact_info"));
-            post.setStatus(PostStatus.valueOf(rs.getString("status").toUpperCase()));
 
             return post;
         }
