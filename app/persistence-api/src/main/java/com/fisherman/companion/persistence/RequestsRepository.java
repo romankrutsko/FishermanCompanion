@@ -5,7 +5,7 @@ import java.util.List;
 import com.fisherman.companion.dto.RequestDto;
 
 public interface RequestsRepository {
-    void createRequest(RequestDto request);
+    Long createRequest(RequestDto request);
 
     RequestDto getRequestById(Long requestId);
 
