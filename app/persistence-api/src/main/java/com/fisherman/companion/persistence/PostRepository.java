@@ -18,7 +18,9 @@ public interface PostRepository {
 
     List<PostDto> findPostsInBoundingBoxByCategory(BoundingBoxDimensions boxDimensions, LocalDateTime timeFrom, LocalDateTime timeTo, Long categoryId);
 
-    List<PostDto> findUserPosts(Long userId, int take, int skip);
+    List<PostDto> findUserPostsWithPagination(Long userId, int take, int skip);
+
+    List<Long> findAllUserPostsIds(Long userId);
 
     void updatePostById(PostDto postDto);
 

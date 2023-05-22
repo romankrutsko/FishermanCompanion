@@ -1,16 +1,22 @@
 package com.fisherman.companion.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fisherman.companion.dto.RatingDto;
+import com.fisherman.companion.dto.RequestDto;
 import com.fisherman.companion.dto.UserDto;
 import com.fisherman.companion.dto.UserRole;
 import com.fisherman.companion.dto.request.CreateUserRequest;
 import com.fisherman.companion.dto.request.UpdateUserRequest;
 import com.fisherman.companion.dto.response.UserResponse;
 import com.fisherman.companion.dto.response.ResponseStatus;
+import com.fisherman.companion.persistence.PostRepository;
+import com.fisherman.companion.persistence.RatingRepository;
+import com.fisherman.companion.persistence.RequestsRepository;
 import com.fisherman.companion.persistence.UserRepository;
 import com.fisherman.companion.service.exception.RequestException;
 
@@ -23,7 +29,9 @@ import lombok.RequiredArgsConstructor;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final TokenService tokenService;
-    private final RatingService ratingService;
+    private final RatingRepository ratingRepository;
+    private final PostRepository postRepository;
+    private final RequestsRepository requestsRepository;
     private final CloudStorageService cloudStorageService;
     private final HashService hashService;
 
@@ -85,7 +93,7 @@ public class UserServiceImpl implements UserService {
     private UserResponse populateUserResponseWithAvgRating(final UserDto user) {
         final UserResponse userResponse = mapUserToResponse(user);
 
-        final Double averageRating = ratingService.getUserAverageRatingByUserId(user.id());
+        final Double averageRating = ratingRepository.getAverageRatingForUser(user.id());
 
         userResponse.setAverageRating(averageRating);
 
@@ -140,8 +148,26 @@ public class UserServiceImpl implements UserService {
     public String deleteUser(final HttpServletRequest request, HttpServletResponse response, Long userId) {
         tokenService.verifyAuthentication(request);
 
+        deleteAllUserConnectedEntitiesByUserId(userId);
+
         userRepository.deleteUserById(userId);
 
         return ResponseStatus.USER_DELETED_SUCCESSFULLY.getCode();
+    }
+
+    private void deleteAllUserConnectedEntitiesByUserId(final Long userId) {
+        final List<Long> userPosts = postRepository.findAllUserPostsIds(userId);
+        final List<RequestDto> requestsToPosts = userPosts.stream()
+                                                          .flatMap(postId -> requestsRepository.getRequestsByPostId(postId).stream())
+                                                          .toList();
+
+        requestsToPosts.forEach(requestDto -> requestsRepository.deleteRequest(requestDto.getId()));
+        userPosts.forEach(postRepository::deleteById);
+
+        final List<RequestDto> userRequests = requestsRepository.getRequestsByUserId(userId);
+        userRequests.forEach(requestDto -> requestsRepository.deleteRequest(requestDto.getId()));
+
+        final List<RatingDto> userRatings = ratingRepository.getRatingsWithCommentsForUser(userId);
+        userRatings.forEach(ratingDto -> ratingRepository.deleteRatingById(ratingDto.id()));
     }
 }

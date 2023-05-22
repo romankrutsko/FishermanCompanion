@@ -128,7 +128,7 @@ public class PostRepositoryJdbcImpl implements PostRepository {
     }
 
     @Override
-    public List<PostDto> findUserPosts(final Long userId, final int take, final int skip) {
+    public List<PostDto> findUserPostsWithPagination(final Long userId, final int take, final int skip) {
         final String sql = """
                 SELECT *
                 FROM posts
@@ -144,6 +144,17 @@ public class PostRepositoryJdbcImpl implements PostRepository {
                 .addValue("skip", skip);
 
         return namedParameterJdbcTemplate.query(sql, params, new PostMapper());
+    }
+
+    @Override
+    public List<Long> findAllUserPostsIds(final Long userId) {
+        final String sql = """
+                SELECT id
+                FROM posts
+                WHERE user_id = :userId
+                """;
+
+        return namedParameterJdbcTemplate.query(sql, Map.of("userId", userId), (rs, rowNum) -> rs.getLong("id"));
     }
 
     @Override

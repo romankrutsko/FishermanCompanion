@@ -12,6 +12,7 @@ import com.fisherman.companion.dto.CategoryDto;
 import com.fisherman.companion.dto.Geolocation;
 import com.fisherman.companion.dto.GetPostsPaginationParams;
 import com.fisherman.companion.dto.PostDto;
+import com.fisherman.companion.dto.RequestDto;
 import com.fisherman.companion.dto.UserDto;
 import com.fisherman.companion.dto.request.CreatePostRequest;
 import com.fisherman.companion.dto.request.GetPostsByCategoryRequest;
@@ -22,6 +23,7 @@ import com.fisherman.companion.dto.response.PostResponse;
 import com.fisherman.companion.dto.response.UserResponse;
 import com.fisherman.companion.persistence.CategoryRepository;
 import com.fisherman.companion.persistence.PostRepository;
+import com.fisherman.companion.persistence.RequestsRepository;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +36,7 @@ public class PostServiceImpl implements PostService {
     private final UserService userService;
     private final TokenService tokenService;
     private final GeolocationService geolocationService;
+    private final RequestsRepository requestsRepository;
 
     private static final double EARTH_RADIUS_KM = 6371.0;
     private static final double KM_PER_DEGREE_LATITUDE = 111.2;
@@ -252,6 +255,10 @@ public class PostServiceImpl implements PostService {
     public void deletePostById(final HttpServletRequest request, final Long postId) {
         tokenService.verifyAuthentication(request);
 
+        final List<RequestDto> requestsToPost = requestsRepository.getRequestsByPostId(postId);
+
+        requestsToPost.forEach(requestDto -> requestsRepository.deleteRequest(requestDto.getId()));
+
         postRepository.deleteById(postId);
     }
 
@@ -259,7 +266,7 @@ public class PostServiceImpl implements PostService {
     public GenericListResponse<PostResponse> findUserPostsWithPagination(final HttpServletRequest request, final Long userId, final int take, final int skip) {
         tokenService.verifyAuthentication(request);
 
-        final List<PostDto> listOfUserPosts = postRepository.findUserPosts(userId, take, skip);
+        final List<PostDto> listOfUserPosts = postRepository.findUserPostsWithPagination(userId, take, skip);
 
         final List<PostResponse> response = getPostResponses(listOfUserPosts);
 
