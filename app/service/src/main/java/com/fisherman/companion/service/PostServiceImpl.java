@@ -22,7 +22,6 @@ import com.fisherman.companion.dto.response.PostResponse;
 import com.fisherman.companion.dto.response.UserResponse;
 import com.fisherman.companion.persistence.CategoryRepository;
 import com.fisherman.companion.persistence.PostRepository;
-import com.fisherman.companion.persistence.RatingRepository;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +31,6 @@ import lombok.RequiredArgsConstructor;
 public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
     private final CategoryRepository categoryRepository;
-    private final RatingRepository ratingRepository;
     private final UserService userService;
     private final TokenService tokenService;
     private final GeolocationService geolocationService;
@@ -242,8 +240,9 @@ public class PostServiceImpl implements PostService {
     public GenericListResponse<PostResponse> sortByRatingAndStartTime(final List<PostResponse> postList) {
         final List<PostResponse> response = postList.stream()
                        .sorted(Comparator.comparing(PostResponse::startDate)
-                                         .thenComparingDouble(post -> Optional.ofNullable(ratingRepository.getAverageRatingForUser(post.user().getId()))
-                                                                              .orElse(0.0)))
+                                         .thenComparingDouble(post -> Optional.ofNullable(post.user().getAverageRating())
+                                                                              .orElse(0.0))
+                                         .reversed())
                        .toList();
 
         return GenericListResponse.of(response);
