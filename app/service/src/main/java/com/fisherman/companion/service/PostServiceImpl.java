@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.springframework.stereotype.Service;
 
@@ -271,5 +272,42 @@ public class PostServiceImpl implements PostService {
         final List<PostResponse> response = getPostResponses(listOfUserPosts);
 
         return GenericListResponse.of(response);
+    }
+
+    @Override
+    public GenericListResponse<PostResponse> findUserFutureTravels(final HttpServletRequest request, final Long userId) {
+        tokenService.verifyAuthentication(request);
+
+        final List<PostDto> listOfUsersPosts = postRepository.findUserPostsWithFutureStartDate(userId);
+
+        final List<PostDto> listOfPostsWithRequestsFromCurUser = postRepository.findPostsWithRequestsFromUserByUserId(userId);
+
+        final List<PostDto> futureTravels = Stream.concat(listOfUsersPosts.stream(), listOfPostsWithRequestsFromCurUser.stream())
+                     .sorted(Comparator.comparing(PostDto::getStartDate))
+                     .toList();
+
+        final List<PostResponse> converted = getPostResponses(futureTravels);
+
+        return GenericListResponse.of(converted);
+    }
+
+    @Override
+    public GenericListResponse<PostResponse> findUserFinishedTravels(final HttpServletRequest request, final Long userId, final Long postsAfterDaysToShow) {
+        tokenService.verifyAuthentication(request);
+
+        final LocalDateTime timeToFilterFinishedPosts = LocalDateTime.now().minusDays(postsAfterDaysToShow);
+
+        final List<PostDto> listOfUsersPosts = postRepository.findUserPostsWithStartDateInPast(userId, timeToFilterFinishedPosts);
+
+        final List<PostDto> listOfPostsWithRequestsFromCurUser = postRepository.findPostsWithRequestFromUserInPast(userId, timeToFilterFinishedPosts);
+
+        final List<PostDto> futureTravels = Stream.concat(listOfUsersPosts.stream(), listOfPostsWithRequestsFromCurUser.stream())
+                                                  .sorted(Comparator.comparing(PostDto::getStartDate)
+                                                                    .reversed())
+                                                  .toList();
+
+        final List<PostResponse> converted = getPostResponses(futureTravels);
+
+        return GenericListResponse.of(converted);
     }
 }

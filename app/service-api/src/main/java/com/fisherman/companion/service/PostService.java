@@ -23,4 +23,8 @@ public interface PostService {
     void deletePostById(HttpServletRequest request, Long postId);
 
     GenericListResponse<PostResponse> findUserPostsWithPagination(HttpServletRequest request, Long userId, int take, int skip);
+
+    GenericListResponse<PostResponse> findUserFutureTravels(HttpServletRequest request, Long userId);
+
+    GenericListResponse<PostResponse> findUserFinishedTravels(HttpServletRequest request, Long userId, Long postsAfterDaysToShow);
 }

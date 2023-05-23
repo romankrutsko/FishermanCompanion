@@ -61,6 +61,17 @@ public class PostController {
         return postService.findAllPosts(take, skip);
     }
 
+    @GetMapping("/future/{userId}")
+    GenericListResponse<PostResponse> findUserFuturePosts(HttpServletRequest request, @PathVariable(value = "userId") Long userId) {
+        return postService.findUserFutureTravels(request, userId);
+    }
+
+    @GetMapping("/finished/{userId}")
+    GenericListResponse<PostResponse> findUserFinishedPosts(HttpServletRequest request, @RequestParam(value = "days", defaultValue = "7") final Long days,
+                                                            @PathVariable(value = "userId") Long userId) {
+        return postService.findUserFinishedTravels(request, userId, days);
+    }
+
     @DeleteMapping("/{postId}")
     void deletePostById(HttpServletRequest request, @PathVariable(value = "postId") Long postId) {
         postService.deletePostById(request, postId);
