@@ -22,12 +22,13 @@ public class RatingRepositoryJdbcImpl implements RatingRepository {
     @Override
     public void createRating(final CreateRatingRequest request, final Long ratedBy) {
         final String sql = """
-                INSERT INTO ratings (user_id, rated_by, rating, comment)
-                VALUES (:userId, :ratedBy, :rating, :comment)
+                INSERT INTO ratings (user_id, post_id, rated_by, rating, comment)
+                VALUES (:userId, :postId, :ratedBy, :rating, :comment)
                 """;
 
         final Map<String, Object> params = Map.of(
                 "userId", request.userId(),
+                "postId", request.postId(),
                 "ratedBy", ratedBy,
                 "rating", request.rating(),
                 "comment", request.comment()
@@ -56,6 +57,27 @@ public class RatingRepositoryJdbcImpl implements RatingRepository {
                 """;
 
         return namedParameterJdbcTemplate.query(sql, Map.of("userId", userId), new RatingMapper());
+    }
+
+    @Override
+    public boolean canUserRate(final Long postId, final Long currentUserId, final Long userIdToCheck) {
+        final String sql = """
+                SELECT NOT EXISTS (
+                    SELECT 1
+                    FROM ratings
+                    WHERE post_id = :postId
+                      AND rated_by = :ratedBy
+                      AND user_id = :userId
+                ) AS no_results;
+                """;
+
+        final Map<String, Object> params = Map.of(
+                "userId", userIdToCheck,
+                "postId", postId,
+                "ratedBy", currentUserId
+        );
+
+        return Boolean.TRUE.equals(namedParameterJdbcTemplate.queryForObject(sql, params, Boolean.class));
     }
 
     @Override

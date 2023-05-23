@@ -20,6 +20,14 @@ public interface PostRepository {
 
     List<PostDto> findUserPostsWithPagination(Long userId, int take, int skip);
 
+    List<PostDto> findUserPostsWithFutureStartDate(Long userId);
+
+    List<PostDto> findUserPostsWithStartDateInPast(Long userId, LocalDateTime timeToFilter);
+
+    List<PostDto> findPostsWithRequestsFromUserByUserId(Long userId);
+
+    List<PostDto> findPostsWithRequestFromUserInPast(Long userId, LocalDateTime timeFilterTo);
+
     List<Long> findAllUserPostsIds(Long userId);
 
     void updatePostById(PostDto postDto);

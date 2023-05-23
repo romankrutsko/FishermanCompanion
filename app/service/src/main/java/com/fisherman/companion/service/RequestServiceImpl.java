@@ -10,6 +10,7 @@ import com.fisherman.companion.dto.UserDto;
 import com.fisherman.companion.dto.request.CreateRequestRequest;
 import com.fisherman.companion.dto.request.UpdateRequestRequest;
 import com.fisherman.companion.dto.response.GenericListResponse;
+import com.fisherman.companion.dto.response.RequestResponse;
 import com.fisherman.companion.persistence.RequestsRepository;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,7 +23,7 @@ public class RequestServiceImpl implements RequestService {
     private final TokenService tokenService;
 
     @Override
-    public RequestDto createRequest(final HttpServletRequest request, final CreateRequestRequest createRequestRequest) {
+    public RequestResponse createRequest(final HttpServletRequest request, final CreateRequestRequest createRequestRequest) {
         tokenService.verifyAuthentication(request);
 
         final RequestDto requestDto = mapToRequestDto(createRequestRequest);
@@ -31,7 +32,7 @@ public class RequestServiceImpl implements RequestService {
 
         requestDto.setId(requestId);
 
-        return requestDto;
+        return mapToResponse(requestDto);
     }
 
     private RequestDto mapToRequestDto(final CreateRequestRequest request) {
@@ -44,26 +45,50 @@ public class RequestServiceImpl implements RequestService {
                 .build();
     }
 
+    public RequestResponse mapToResponse(RequestDto requestDto) {
+        final String translatedStatus = translateStatus(requestDto.getStatus());
+
+        return RequestResponse.builder()
+                              .id(requestDto.getId())
+                              .userId(requestDto.getUserId())
+                              .postId(requestDto.getPostId())
+                              .comment(requestDto.getComment())
+                              .status(translatedStatus)
+                              .build();
+    }
+
+    private static String translateStatus(RequestStatus status) {
+        return switch (status) {
+            case PENDING -> "ОЧІКУВАННЯ";
+            case ACCEPTED -> "ПРИЙНЯТИЙ";
+            case DECLINED -> "ВІДХИЛЕНИЙ";
+        };
+    }
+
     @Override
-    public GenericListResponse<RequestDto> getUserRequestsByUserId(final HttpServletRequest request) {
+    public GenericListResponse<RequestResponse> getUserRequestsByUserId(final HttpServletRequest request) {
         final UserDto userDto = tokenService.verifyAuthentication(request);
 
         final List<RequestDto> listOfCurrentUserRequests = requestsRepository.getRequestsByUserId(userDto.id());
 
-        return GenericListResponse.of(listOfCurrentUserRequests);
+        final List<RequestResponse> requestResponses = listOfCurrentUserRequests.stream().map(this::mapToResponse).toList();
+
+        return GenericListResponse.of(requestResponses);
     }
 
     @Override
-    public GenericListResponse<RequestDto> getRequestsByPostId(final HttpServletRequest request, final Long postId) {
+    public GenericListResponse<RequestResponse> getRequestsByPostId(final HttpServletRequest request, final Long postId) {
         tokenService.verifyAuthentication(request);
 
         final List<RequestDto> listOfRequestsToPost = requestsRepository.getRequestsByPostId(postId);
 
-        return GenericListResponse.of(listOfRequestsToPost);
+        final List<RequestResponse> requestResponses = listOfRequestsToPost.stream().map(this::mapToResponse).toList();
+
+        return GenericListResponse.of(requestResponses);
     }
 
     @Override
-    public RequestDto updateRequestComment(final HttpServletRequest request, final UpdateRequestRequest updateRequestRequest, final Long id) {
+    public RequestResponse updateRequestComment(final HttpServletRequest request, final UpdateRequestRequest updateRequestRequest, final Long id) {
         tokenService.verifyAuthentication(request);
 
         final RequestDto requestDto = RequestDto
@@ -73,21 +98,36 @@ public class RequestServiceImpl implements RequestService {
 
         requestsRepository.updateRequest(requestDto);
 
-        return requestsRepository.getRequestById(id);
+        final RequestDto updated = requestsRepository.getRequestById(id);
+
+        return mapToResponse(updated);
     }
 
     @Override
-    public RequestDto updateRequestStatus(final HttpServletRequest request, final String status, final Long id) {
+    public RequestResponse updateRequestStatus(final HttpServletRequest request, final String status, final Long id) {
         tokenService.verifyAuthentication(request);
+
+        final RequestStatus requestStatus = mapToStatus(status.toUpperCase());
 
         final RequestDto requestDto = RequestDto
                 .builder().id(id)
-                .status(RequestStatus.valueOf(status.toUpperCase()))
+                .status(requestStatus)
                 .build();
 
         requestsRepository.updateRequestStatus(requestDto);
 
-        return requestsRepository.getRequestById(id);
+        final RequestDto updated = requestsRepository.getRequestById(id);
+
+        return mapToResponse(updated);
+    }
+
+    public RequestStatus mapToStatus(String statusInUkrainian) {
+        return switch (statusInUkrainian) {
+            case "ОЧІКУВАННЯ" -> RequestStatus.PENDING;
+            case "ПРИЙНЯТИЙ" -> RequestStatus.ACCEPTED;
+            case "ВІДХИЛЕНИЙ" -> RequestStatus.DECLINED;
+            default -> throw new IllegalArgumentException("Invalid Ukrainian status: " + statusInUkrainian);
+        };
     }
 
     @Override

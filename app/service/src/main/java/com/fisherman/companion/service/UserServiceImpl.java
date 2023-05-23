@@ -1,5 +1,7 @@
 package com.fisherman.companion.service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Optional;
 
@@ -95,7 +97,11 @@ public class UserServiceImpl implements UserService {
 
         final Double averageRating = ratingRepository.getAverageRatingForUser(user.id());
 
-        userResponse.setAverageRating(averageRating);
+        final Double rounded = Optional.ofNullable(averageRating).map(r -> BigDecimal.valueOf(r)
+                                                                                .setScale(1, RoundingMode.HALF_UP)
+                                                                                .doubleValue()).orElse(null);
+
+        userResponse.setAverageRating(rounded);
 
         return userResponse;
     }

@@ -132,7 +132,7 @@ public class PostRepositoryJdbcImpl implements PostRepository {
         final String sql = """
                 SELECT *
                 FROM posts
-                WHERE user_id = :userId
+                WHERE user_id = :userId AND start_date > NOW()
                 ORDER BY start_date DESC
                 LIMIT :take
                 OFFSET :skip
@@ -142,6 +142,65 @@ public class PostRepositoryJdbcImpl implements PostRepository {
                 .addValue("userId", userId)
                 .addValue("take", take)
                 .addValue("skip", skip);
+
+        return namedParameterJdbcTemplate.query(sql, params, new PostMapper());
+    }
+
+    @Override
+    public List<PostDto> findUserPostsWithFutureStartDate(final Long userId) {
+        final String sql = """
+                SELECT p.*
+                FROM posts p
+                JOIN requests r ON r.post_id = p.id
+                WHERE p.user_id = :userId AND p.start_date > NOW() 
+                AND r.status = 'accepted'        
+                """;
+
+        return namedParameterJdbcTemplate.query(sql, Map.of("userId", userId), new PostMapper());
+    }
+
+    @Override
+    public List<PostDto> findUserPostsWithStartDateInPast(final Long userId, final LocalDateTime timeFilterTo) {
+        final String sql = """
+                SELECT *
+                FROM posts
+                WHERE user_id = :userId AND start_date between :timeFilterTo AND NOW()         
+                """;
+
+        final MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("userId", userId)
+                .addValue("timeFilterTo", Timestamp.valueOf(timeFilterTo));
+
+        return namedParameterJdbcTemplate.query(sql, params, new PostMapper());
+    }
+
+    @Override
+    public List<PostDto> findPostsWithRequestsFromUserByUserId(final Long userId) {
+        final String sql = """
+                SELECT p.*
+                FROM posts p
+                JOIN requests r ON r.post_id = p.id
+                WHERE r.user_id = :userId
+                AND p.start_date > NOW() AND r.status = 'accepted'
+                """;
+
+        return namedParameterJdbcTemplate.query(sql, Map.of("userId", userId), new PostMapper());
+    }
+
+    @Override
+    public List<PostDto> findPostsWithRequestFromUserInPast(final Long userId, final LocalDateTime timeFilterTo) {
+        final String sql = """
+                SELECT p.*
+                FROM posts p
+                JOIN requests r ON r.post_id = p.id
+                WHERE r.user_id = :userId
+                AND r.status = 'accepted'
+                AND start_date between :timeFilterTo AND NOW()          
+                """;
+
+        final MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("userId", userId)
+                .addValue("timeFilterTo", Timestamp.valueOf(timeFilterTo));
 
         return namedParameterJdbcTemplate.query(sql, params, new PostMapper());
     }

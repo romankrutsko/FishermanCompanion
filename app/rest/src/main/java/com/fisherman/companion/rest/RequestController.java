@@ -10,11 +10,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fisherman.companion.dto.RequestDto;
 import com.fisherman.companion.dto.request.CreateRequestRequest;
 import com.fisherman.companion.dto.request.UpdateRequestRequest;
 import com.fisherman.companion.dto.request.UpdateStatusRequest;
 import com.fisherman.companion.dto.response.GenericListResponse;
+import com.fisherman.companion.dto.response.RequestResponse;
 import com.fisherman.companion.service.RequestService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,26 +27,26 @@ public class RequestController {
     private final RequestService requestService;
 
     @PostMapping
-    RequestDto createRequest(HttpServletRequest request, @RequestBody CreateRequestRequest createRequestRequest) {
+    RequestResponse createRequest(HttpServletRequest request, @RequestBody CreateRequestRequest createRequestRequest) {
         return requestService.createRequest(request, createRequestRequest);
     }
     @GetMapping
-    GenericListResponse<RequestDto> getUserRequests(HttpServletRequest request) {
+    GenericListResponse<RequestResponse> getUserRequests(HttpServletRequest request) {
         return requestService.getUserRequestsByUserId(request);
     }
 
     @GetMapping("/{postId}")
-    GenericListResponse<RequestDto> getRequestsByPostId(HttpServletRequest request, @PathVariable(value = "postId") Long postId) {
+    GenericListResponse<RequestResponse> getRequestsByPostId(HttpServletRequest request, @PathVariable(value = "postId") Long postId) {
         return requestService.getRequestsByPostId(request, postId);
     }
 
     @PostMapping("/{requestId}")
-    RequestDto updateRequest(HttpServletRequest request, @RequestBody UpdateRequestRequest updateRequestRequest, @PathVariable(value = "requestId") Long requestId) {
+    RequestResponse updateRequest(HttpServletRequest request, @RequestBody UpdateRequestRequest updateRequestRequest, @PathVariable(value = "requestId") Long requestId) {
         return requestService.updateRequestComment(request, updateRequestRequest, requestId);
     }
 
     @PatchMapping("/{requestId}")
-    RequestDto updateStatus(HttpServletRequest request, @RequestBody final UpdateStatusRequest updateStatusRequest, @PathVariable(value = "requestId") Long requestId) {
+    RequestResponse updateStatus(HttpServletRequest request, @RequestBody final UpdateStatusRequest updateStatusRequest, @PathVariable(value = "requestId") Long requestId) {
         return requestService.updateRequestStatus(request, updateStatusRequest.status(), requestId);
     }
 

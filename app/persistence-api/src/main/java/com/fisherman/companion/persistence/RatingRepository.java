@@ -13,5 +13,7 @@ public interface RatingRepository {
 
     List<RatingDto> getRatingsWithCommentsForUser(Long userId);
 
+    boolean canUserRate(Long postId, Long currentUserId, Long userIdToCheck);
+
     void deleteRatingById(Long ratingId);
 }
