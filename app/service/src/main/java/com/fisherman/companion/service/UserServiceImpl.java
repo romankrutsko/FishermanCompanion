@@ -3,17 +3,21 @@ package com.fisherman.companion.service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fisherman.companion.dto.PostDto;
 import com.fisherman.companion.dto.RatingDto;
 import com.fisherman.companion.dto.RequestDto;
 import com.fisherman.companion.dto.UserDto;
 import com.fisherman.companion.dto.UserRole;
 import com.fisherman.companion.dto.request.CreateUserRequest;
 import com.fisherman.companion.dto.request.UpdateUserRequest;
+import com.fisherman.companion.dto.response.GenericListResponse;
+import com.fisherman.companion.dto.response.GetUserToRateResponse;
 import com.fisherman.companion.dto.response.UserResponse;
 import com.fisherman.companion.dto.response.ResponseStatus;
 import com.fisherman.companion.persistence.PostRepository;
@@ -143,6 +147,47 @@ public class UserServiceImpl implements UserService {
         final UserDto updatedUser = userRepository.findUserByUsername(username);
 
         return populateUserResponseWithAvgRating(updatedUser);
+    }
+
+    @Override
+    public GenericListResponse<UserResponse> findFutureTripMembers(final HttpServletRequest request, final Long postId) {
+        final UserDto user = tokenService.verifyAuthentication(request);
+
+        final List<UserResponse> response = getUserResponses(postId, user.id());
+
+        return GenericListResponse.of(response);
+    }
+
+    private List<UserResponse> getUserResponses(final Long postId, final Long userId) {
+        final PostDto post = postRepository.findPostById(postId);
+
+        final List<Long> tripMembers = requestsRepository.getUserIdsOfAcceptedRequestsByPostId(postId, userId);
+
+        if (!Objects.equals(post.getUserId(), userId)) {
+            tripMembers.add(post.getUserId());
+        }
+
+        final List<UserDto> members = tripMembers.stream().map(userRepository::findUserById).toList();
+
+        return members.stream().map(this::populateUserResponseWithAvgRating).toList();
+    }
+
+    @Override
+    public GenericListResponse<GetUserToRateResponse> findFinishedTripMembersToRate(final HttpServletRequest request, final Long postId) {
+        final UserDto user = tokenService.verifyAuthentication(request);
+
+        final List<UserResponse> response = getUserResponses(postId, user.id());
+
+        final List<GetUserToRateResponse> userToRateResponse = response.stream().map(userResponse -> {
+            final boolean canBeRated = ratingRepository.canUserRate(postId, user.id(), userResponse.getId());
+
+            return GetUserToRateResponse.builder()
+                                        .user(userResponse)
+                                        .canBeRated(canBeRated)
+                                        .build();
+        }).toList();
+
+        return GenericListResponse.of(userToRateResponse);
     }
 
     @Override

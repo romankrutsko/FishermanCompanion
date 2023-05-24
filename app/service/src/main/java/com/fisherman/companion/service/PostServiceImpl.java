@@ -275,24 +275,24 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public GenericListResponse<PostResponse> findUserFutureTravels(final HttpServletRequest request, final Long userId) {
+    public GenericListResponse<PostResponse> findUserFutureTrips(final HttpServletRequest request, final Long userId) {
         tokenService.verifyAuthentication(request);
 
         final List<PostDto> listOfUsersPosts = postRepository.findUserPostsWithFutureStartDate(userId);
 
         final List<PostDto> listOfPostsWithRequestsFromCurUser = postRepository.findPostsWithRequestsFromUserByUserId(userId);
 
-        final List<PostDto> futureTravels = Stream.concat(listOfUsersPosts.stream(), listOfPostsWithRequestsFromCurUser.stream())
+        final List<PostDto> futureTrips = Stream.concat(listOfUsersPosts.stream(), listOfPostsWithRequestsFromCurUser.stream())
                      .sorted(Comparator.comparing(PostDto::getStartDate))
                      .toList();
 
-        final List<PostResponse> converted = getPostResponses(futureTravels);
+        final List<PostResponse> converted = getPostResponses(futureTrips);
 
         return GenericListResponse.of(converted);
     }
 
     @Override
-    public GenericListResponse<PostResponse> findUserFinishedTravels(final HttpServletRequest request, final Long userId, final Long postsAfterDaysToShow) {
+    public GenericListResponse<PostResponse> findUserFinishedTrips(final HttpServletRequest request, final Long userId, final Long postsAfterDaysToShow) {
         tokenService.verifyAuthentication(request);
 
         final LocalDateTime timeToFilterFinishedPosts = LocalDateTime.now().minusDays(postsAfterDaysToShow);
@@ -301,12 +301,12 @@ public class PostServiceImpl implements PostService {
 
         final List<PostDto> listOfPostsWithRequestsFromCurUser = postRepository.findPostsWithRequestFromUserInPast(userId, timeToFilterFinishedPosts);
 
-        final List<PostDto> futureTravels = Stream.concat(listOfUsersPosts.stream(), listOfPostsWithRequestsFromCurUser.stream())
+        final List<PostDto> futureTrips = Stream.concat(listOfUsersPosts.stream(), listOfPostsWithRequestsFromCurUser.stream())
                                                   .sorted(Comparator.comparing(PostDto::getStartDate)
                                                                     .reversed())
                                                   .toList();
 
-        final List<PostResponse> converted = getPostResponses(futureTravels);
+        final List<PostResponse> converted = getPostResponses(futureTrips);
 
         return GenericListResponse.of(converted);
     }

@@ -63,13 +63,13 @@ public class PostController {
 
     @GetMapping("/future/{userId}")
     GenericListResponse<PostResponse> findUserFuturePosts(HttpServletRequest request, @PathVariable(value = "userId") Long userId) {
-        return postService.findUserFutureTravels(request, userId);
+        return postService.findUserFutureTrips(request, userId);
     }
 
     @GetMapping("/finished/{userId}")
     GenericListResponse<PostResponse> findUserFinishedPosts(HttpServletRequest request, @RequestParam(value = "days", defaultValue = "7") final Long days,
                                                             @PathVariable(value = "userId") Long userId) {
-        return postService.findUserFinishedTravels(request, userId, days);
+        return postService.findUserFinishedTrips(request, userId, days);
     }
 
     @DeleteMapping("/{postId}")

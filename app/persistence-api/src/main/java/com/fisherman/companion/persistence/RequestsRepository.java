@@ -13,6 +13,8 @@ public interface RequestsRepository {
 
     List<RequestDto> getRequestsByPostId(Long postId);
 
+    List<Long> getUserIdsOfAcceptedRequestsByPostId(Long postId, Long userId);
+
     void updateRequest(RequestDto request);
 
     void updateRequestStatus(RequestDto request);
