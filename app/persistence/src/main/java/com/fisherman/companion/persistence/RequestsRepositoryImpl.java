@@ -77,6 +77,21 @@ public class RequestsRepositoryImpl implements RequestsRepository {
     }
 
     @Override
+    public List<Long> getUserIdsOfAcceptedRequestsByPostId(final Long postId, final Long userId) {
+        final String sql = """
+                SELECT user_id FROM requests
+                WHERE post_id = :postId
+                AND status = 'accepted' AND user_id != :userId
+                """;
+
+        final MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("postId", postId)
+                .addValue("userId", userId);
+
+        return namedParameterJdbcTemplate.queryForList(sql, params, Long.class);
+    }
+
+    @Override
     public void updateRequest(final RequestDto request) {
         final String sql = """
             UPDATE requests

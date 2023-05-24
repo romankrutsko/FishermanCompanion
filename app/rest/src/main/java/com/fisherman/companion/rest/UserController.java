@@ -13,6 +13,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.fisherman.companion.dto.request.CreateUserRequest;
 import com.fisherman.companion.dto.request.UpdateUserRequest;
+import com.fisherman.companion.dto.response.GenericListResponse;
+import com.fisherman.companion.dto.response.GetUserToRateResponse;
 import com.fisherman.companion.dto.response.UserResponse;
 import com.fisherman.companion.service.UserService;
 
@@ -34,6 +36,16 @@ public class UserController {
     @GetMapping("/{userId}")
     UserResponse getUser(@PathVariable(value = "userId") Long userId) {
         return userService.findUserById(userId);
+    }
+
+    @GetMapping("future/members/{postId}")
+    GenericListResponse<UserResponse> getFutureTripMembers(HttpServletRequest request, @PathVariable(value = "postId") Long postId) {
+        return userService.findFutureTripMembers(request, postId);
+    }
+
+    @GetMapping("finished/members/{postId}")
+    GenericListResponse<GetUserToRateResponse> getFinishedTripMembersToRate(HttpServletRequest request, @PathVariable(value = "postId") Long postId) {
+        return userService.findFinishedTripMembersToRate(request, postId);
     }
 
     @PatchMapping("/{userId}")

@@ -24,7 +24,7 @@ public interface PostService {
 
     GenericListResponse<PostResponse> findUserPostsWithPagination(HttpServletRequest request, Long userId, int take, int skip);
 
-    GenericListResponse<PostResponse> findUserFutureTravels(HttpServletRequest request, Long userId);
+    GenericListResponse<PostResponse> findUserFutureTrips(HttpServletRequest request, Long userId);
 
-    GenericListResponse<PostResponse> findUserFinishedTravels(HttpServletRequest request, Long userId, Long postsAfterDaysToShow);
+    GenericListResponse<PostResponse> findUserFinishedTrips(HttpServletRequest request, Long userId, Long postsAfterDaysToShow);
 }
