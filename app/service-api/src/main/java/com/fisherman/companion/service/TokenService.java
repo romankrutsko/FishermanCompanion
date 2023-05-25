@@ -11,6 +11,8 @@ public interface TokenService {
 
     UserDto verifyAuthentication(HttpServletRequest request);
 
+    UserDto findUserFromToken(HttpServletRequest request);
+
     String generateToken(SignTokenParams params, HttpServletResponse response);
 
 }

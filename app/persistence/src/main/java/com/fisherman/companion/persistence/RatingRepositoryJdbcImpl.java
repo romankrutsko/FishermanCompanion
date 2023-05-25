@@ -68,7 +68,7 @@ public class RatingRepositoryJdbcImpl implements RatingRepository {
                     WHERE post_id = :postId
                       AND rated_by = :ratedBy
                       AND user_id = :userId
-                ) AS no_results;
+                ) AS can_be_rated;
                 """;
 
         final Map<String, Object> params = Map.of(

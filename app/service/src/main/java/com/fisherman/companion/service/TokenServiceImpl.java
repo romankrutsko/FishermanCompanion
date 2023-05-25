@@ -71,10 +71,17 @@ public class TokenServiceImpl implements TokenService {
         return token == null || !isTokenValid(token);
     }
 
+    @Override
+    public UserDto findUserFromToken(final HttpServletRequest request) {
+        return getUserFromToken(request);
+    }
+
     private UserDto getUserFromToken(final HttpServletRequest request) {
         final String username = findUsernameFromToken(request);
 
-        return userRepository.findUserByUsername(username);
+        return Optional.ofNullable(username)
+                       .map(userRepository::findUserByUsername)
+                       .orElse(null);
     }
 
     private String findUsernameFromToken(HttpServletRequest request) {
@@ -86,7 +93,9 @@ public class TokenServiceImpl implements TokenService {
                                         .build();
 
 
-        return jwtParser.parseClaimsJws(token).getBody().getSubject();
+        return Optional.ofNullable(token)
+                       .map(authToken -> jwtParser.parseClaimsJws(authToken).getBody().getSubject())
+                       .orElse(null);
     }
 
     private String getTokenFromRequest(HttpServletRequest request) {
