@@ -12,6 +12,8 @@ import jakarta.servlet.http.HttpServletRequest;
 public interface PostService {
     PostResponse createPost(HttpServletRequest request, CreatePostRequest createPostRequest);
 
+    PostResponse findPostById(Long postId);
+
     GenericListResponse<PostResponse> findAllPosts(HttpServletRequest request, int take, int skip);
 
     PostResponse updatePostInfo(HttpServletRequest request, UpdatePostRequest updatePostRequest, Long postId);

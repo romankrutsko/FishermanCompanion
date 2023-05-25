@@ -106,6 +106,15 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    public PostResponse findPostById(final Long postId) {
+        final PostDto post = postRepository.findPostById(postId);
+
+        populatePostWithCategoryName(post);
+
+        return convertToResponse(post, false);
+    }
+
+    @Override
     public GenericListResponse<PostResponse> findAllPosts(final HttpServletRequest request, final int take, final int skip) {
         final Long userId = checkIfUserLoggedInToFilterPosts(request);
 
