@@ -55,7 +55,7 @@ public class PostServiceImpl implements PostService {
 
         post.setId(postId);
 
-        return convertToResponse(post);
+        return convertToResponse(post, false);
     }
 
     private PostDto mapCreateRequestToPostDto(final CreatePostRequest createPostRequest, final Long userId) {
@@ -87,7 +87,7 @@ public class PostServiceImpl implements PostService {
         post.getCategory().setName(categoryName);
     }
 
-    private PostResponse convertToResponse(final PostDto postDto) {
+    private PostResponse convertToResponse(final PostDto postDto, boolean canRespond) {
         final UserResponse user = userService.findUserById(postDto.getUserId());
 
         final String settlement = geolocationService.getSettlementName(postDto.getLatitude(), postDto.getLongitude());
@@ -101,28 +101,61 @@ public class PostServiceImpl implements PostService {
                            .startDate(postDto.getStartDate())
                            .settlement(settlement)
                            .contactInfo(postDto.getContactInfo())
+                           .canRespond(canRespond)
                            .build();
     }
 
     @Override
-    public GenericListResponse<PostResponse> findAllPosts(final int take, final int skip) {
+    public PostResponse findPostById(final Long postId) {
+        final PostDto post = postRepository.findPostById(postId);
+
+        populatePostWithCategoryName(post);
+
+        return convertToResponse(post, false);
+    }
+
+    @Override
+    public GenericListResponse<PostResponse> findAllPosts(final HttpServletRequest request, final int take, final int skip) {
+        final Long userId = checkIfUserLoggedInToFilterPosts(request);
+
         final LocalDateTime timeToShowPosts = LocalDateTime.now().plusHours(2);
 
         final GetPostsPaginationParams paginationParams = new GetPostsPaginationParams(skip, take, timeToShowPosts);
 
         final List<PostDto> posts = postRepository.findAllCategoriesPosts(paginationParams);
 
-        final List<PostResponse> response = getPostResponses(posts);
+        final List<PostResponse> response = getPostResponses(posts, userId);
 
         return GenericListResponse.of(response);
     }
 
-    private List<PostResponse> getPostResponses(final List<PostDto> posts) {
+    private Long checkIfUserLoggedInToFilterPosts(final HttpServletRequest request) {
+        final UserDto userDto = tokenService.findUserFromToken(request);
+
+        return Optional.ofNullable(userDto).map(UserDto::id).orElse(null);
+    }
+
+    private List<PostResponse> convertAllPostResponses(final List<PostDto> posts) {
+        return getPostResponses(posts, null);
+    }
+
+    private List<PostResponse> getPostResponses(final List<PostDto> posts, final Long userId) {
         posts.forEach(this::populatePostWithCategoryName);
 
-        return posts.stream()
-                    .map(this::convertToResponse)
-                    .toList();
+        return Optional.ofNullable(userId)
+                       .map(id -> posts.stream()
+                                       .filter(postDto -> !postDto.getUserId().equals(id))
+                                       .map(post -> checkIfCanRespondAndConvertToResponse(post, userId))
+                                       .toList())
+                       .orElseGet(() -> posts.stream()
+                                             .map(post -> convertToResponse(post, false))
+                                             .toList());
+    }
+
+    private PostResponse checkIfCanRespondAndConvertToResponse(final PostDto postDto, final Long userId) {
+        final boolean canRespond = requestsRepository.checkRequestExists(userId, postDto.getId());
+
+        return convertToResponse(postDto, canRespond);
     }
 
     @Override
@@ -139,7 +172,7 @@ public class PostServiceImpl implements PostService {
 
         populatePostWithCategoryName(updatedPost);
 
-        return convertToResponse(updatedPost);
+        return convertToResponse(updatedPost, false);
     }
 
     private PostDto mapUpdateRequestToPostDto(final UpdatePostRequest updatePostRequest, final Long postId) {
@@ -168,7 +201,9 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public GenericListResponse<PostResponse> findPostsByCategory(final GetPostsByCategoryRequest getPostsByCategoryRequest, int skip, int take) {
+    public GenericListResponse<PostResponse> findPostsByCategory(final HttpServletRequest request, final GetPostsByCategoryRequest getPostsByCategoryRequest, int skip, int take) {
+        final Long userId = checkIfUserLoggedInToFilterPosts(request);
+
         final boolean isSortedByRating = getPostsByCategoryRequest.sortByUserRating();
         final LocalDateTime timeToShowPosts = LocalDateTime.now().plusHours(2);
 
@@ -176,13 +211,15 @@ public class PostServiceImpl implements PostService {
 
         final List<PostDto> posts = postRepository.findPostsByCategory(paginationParams, getPostsByCategoryRequest.categoryId());
 
-        final List<PostResponse> postResponses = getPostResponses(posts);
+        final List<PostResponse> postResponses = getPostResponses(posts, userId);
 
         return isSortedByRating ? sortByRatingAndStartTime(postResponses) : GenericListResponse.of(postResponses);
     }
 
     @Override
-    public GenericListResponse<PostResponse> findPostsNearLocation(final GetPostsInRadiusByCategoryRequest getPostsInRadiusRequest) {
+    public GenericListResponse<PostResponse> findPostsNearLocation(final HttpServletRequest request, final GetPostsInRadiusByCategoryRequest getPostsInRadiusRequest) {
+        final Long userId = checkIfUserLoggedInToFilterPosts(request);
+
         final Double lat = getPostsInRadiusRequest.latitude();
         final Double lng = getPostsInRadiusRequest.longitude();
         final Double radius = getPostsInRadiusRequest.radius();
@@ -200,7 +237,7 @@ public class PostServiceImpl implements PostService {
                                                                  .filter(post -> calcDistanceByHaversineInKm(lat, lng, post.getLatitude(), post.getLongitude()) <= radius)
                                                                  .toList();
 
-        final List<PostResponse> postsConvertedToResponse = getPostResponses(filteredByRadius);
+        final List<PostResponse> postsConvertedToResponse = getPostResponses(filteredByRadius, userId);
 
         return isSortedByRating ? sortByRatingAndStartTime(postsConvertedToResponse) : GenericListResponse.of(postsConvertedToResponse);
     }
@@ -269,7 +306,7 @@ public class PostServiceImpl implements PostService {
 
         final List<PostDto> listOfUserPosts = postRepository.findUserPostsWithPagination(userId, take, skip);
 
-        final List<PostResponse> response = getPostResponses(listOfUserPosts);
+        final List<PostResponse> response = convertAllPostResponses(listOfUserPosts);
 
         return GenericListResponse.of(response);
     }
@@ -286,7 +323,7 @@ public class PostServiceImpl implements PostService {
                      .sorted(Comparator.comparing(PostDto::getStartDate))
                      .toList();
 
-        final List<PostResponse> converted = getPostResponses(futureTrips);
+        final List<PostResponse> converted = convertAllPostResponses(futureTrips);
 
         return GenericListResponse.of(converted);
     }
@@ -306,7 +343,7 @@ public class PostServiceImpl implements PostService {
                                                                     .reversed())
                                                   .toList();
 
-        final List<PostResponse> converted = getPostResponses(futureTrips);
+        final List<PostResponse> converted = convertAllPostResponses(futureTrips);
 
         return GenericListResponse.of(converted);
     }

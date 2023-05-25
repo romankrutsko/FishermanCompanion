@@ -77,6 +77,23 @@ public class RequestsRepositoryImpl implements RequestsRepository {
     }
 
     @Override
+    public boolean checkRequestExists(final Long userId, final Long postId) {
+        String sql = """
+                     SELECT NOT EXISTS (
+                        SELECT 1
+                        FROM requests
+                        WHERE user_id = :userId AND post_id = :postId
+                     ) AS request_exists
+                     """;
+
+        final MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("userId", userId)
+                .addValue("postId", postId);
+
+        return Boolean.TRUE.equals(namedParameterJdbcTemplate.queryForObject(sql, params, Boolean.class));
+    }
+
+    @Override
     public List<Long> getUserIdsOfAcceptedRequestsByPostId(final Long postId, final Long userId) {
         final String sql = """
                 SELECT user_id FROM requests

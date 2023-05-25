@@ -44,21 +44,24 @@ public class PostController {
     }
 
     @PostMapping("/by-category")
-    GenericListResponse<PostResponse> findPostsByCategory(@RequestBody final GetPostsByCategoryRequest postsByCategoryRequest,
+    GenericListResponse<PostResponse> findPostsByCategory(HttpServletRequest request,
+                                                          @RequestBody final GetPostsByCategoryRequest postsByCategoryRequest,
                                                           @RequestParam(value = "skip", defaultValue = "0") final Integer skip,
                                                           @RequestParam(value = "take", defaultValue = "10") final Integer take) {
-        return postService.findPostsByCategory(postsByCategoryRequest, skip, take);
+        return postService.findPostsByCategory(request, postsByCategoryRequest, skip, take);
     }
 
     @PostMapping("/by-location")
-    GenericListResponse<PostResponse> findPostsByLocationAndCategory(@RequestBody final GetPostsInRadiusByCategoryRequest radiusByCategoryRequest) {
-        return postService.findPostsNearLocation(radiusByCategoryRequest);
+    GenericListResponse<PostResponse> findPostsByLocationAndCategory(HttpServletRequest request,
+                                                                     @RequestBody final GetPostsInRadiusByCategoryRequest radiusByCategoryRequest) {
+        return postService.findPostsNearLocation(request, radiusByCategoryRequest);
     }
 
     @GetMapping
-    GenericListResponse<PostResponse> findAllPosts(@RequestParam(value = "skip", defaultValue = "0") final Integer skip,
+    GenericListResponse<PostResponse> findAllPosts(HttpServletRequest request,
+                                                   @RequestParam(value = "skip", defaultValue = "0") final Integer skip,
                                                    @RequestParam(value = "take", defaultValue = "10") final Integer take) {
-        return postService.findAllPosts(take, skip);
+        return postService.findAllPosts(request, take, skip);
     }
 
     @GetMapping("/future/{userId}")

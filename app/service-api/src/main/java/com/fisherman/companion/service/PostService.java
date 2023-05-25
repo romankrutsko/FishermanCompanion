@@ -12,13 +12,15 @@ import jakarta.servlet.http.HttpServletRequest;
 public interface PostService {
     PostResponse createPost(HttpServletRequest request, CreatePostRequest createPostRequest);
 
-    GenericListResponse<PostResponse> findAllPosts(int take, int skip);
+    PostResponse findPostById(Long postId);
+
+    GenericListResponse<PostResponse> findAllPosts(HttpServletRequest request, int take, int skip);
 
     PostResponse updatePostInfo(HttpServletRequest request, UpdatePostRequest updatePostRequest, Long postId);
 
-    GenericListResponse<PostResponse> findPostsByCategory(GetPostsByCategoryRequest getPostsByCategoryRequest, int skip, int take);
+    GenericListResponse<PostResponse> findPostsByCategory(HttpServletRequest request, GetPostsByCategoryRequest getPostsByCategoryRequest, int skip, int take);
 
-    GenericListResponse<PostResponse> findPostsNearLocation(GetPostsInRadiusByCategoryRequest getPostsInRadiusRequest);
+    GenericListResponse<PostResponse> findPostsNearLocation(HttpServletRequest request, GetPostsInRadiusByCategoryRequest getPostsInRadiusRequest);
 
     void deletePostById(HttpServletRequest request, Long postId);
 

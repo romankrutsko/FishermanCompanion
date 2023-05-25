@@ -15,6 +15,7 @@ public record PostResponse(
         String description,
         LocalDateTime startDate,
         String settlement,
-        String contactInfo
+        String contactInfo,
+        boolean canRespond
 ) {
 }
