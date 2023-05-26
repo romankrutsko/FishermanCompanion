@@ -31,8 +31,8 @@ public class RequestController {
         return requestService.createRequest(request, createRequestRequest);
     }
     @GetMapping
-    GenericListResponse<RequestFullDetailsResponse> getUserRequests(HttpServletRequest request) {
-        return requestService.getUserRequestsByUserId(request);
+    GenericListResponse<RequestFullDetailsResponse> getUserNotAcceptedRequests(HttpServletRequest request) {
+        return requestService.getUserNotAcceptedRequestsByUserId(request);
     }
 
     @GetMapping("/{postId}")

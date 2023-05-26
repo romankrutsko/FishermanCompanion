@@ -13,6 +13,7 @@ import com.fisherman.companion.dto.response.GenericListResponse;
 import com.fisherman.companion.dto.response.PostResponse;
 import com.fisherman.companion.dto.response.RequestFullDetailsResponse;
 import com.fisherman.companion.dto.response.RequestResponse;
+import com.fisherman.companion.dto.response.UserResponse;
 import com.fisherman.companion.persistence.RequestsRepository;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class RequestServiceImpl implements RequestService {
     private final RequestsRepository requestsRepository;
+    private final UserService userService;
     private final PostService postService;
     private final TokenService tokenService;
 
@@ -51,10 +53,13 @@ public class RequestServiceImpl implements RequestService {
     }
 
     private RequestFullDetailsResponse mapToFullResponse(RequestResponse requestResponse) {
+        final UserResponse user = userService.findUserById(requestResponse.userId());
+
         final PostResponse post = postService.findPostById(requestResponse.postId());
 
-        return RequestFullDetailsResponse.builder().request(requestResponse)
-                                         .user(post.user())
+        return RequestFullDetailsResponse.builder()
+                                         .request(requestResponse)
+                                         .user(user)
                                          .post(post)
                                          .build();
     }
@@ -80,10 +85,10 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
-    public GenericListResponse<RequestFullDetailsResponse> getUserRequestsByUserId(final HttpServletRequest request) {
+    public GenericListResponse<RequestFullDetailsResponse> getUserNotAcceptedRequestsByUserId(final HttpServletRequest request) {
         final UserDto userDto = tokenService.verifyAuthentication(request);
 
-        final List<RequestDto> listOfCurrentUserRequests = requestsRepository.getRequestsByUserId(userDto.id());
+        final List<RequestDto> listOfCurrentUserRequests = requestsRepository.getNotAcceptedRequestsByUserId(userDto.id());
 
         final List<RequestResponse> requestResponses = listOfCurrentUserRequests.stream().map(this::mapToResponse).toList();
 

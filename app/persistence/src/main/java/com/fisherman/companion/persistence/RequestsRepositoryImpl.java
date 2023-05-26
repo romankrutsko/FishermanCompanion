@@ -66,6 +66,17 @@ public class RequestsRepositoryImpl implements RequestsRepository {
     }
 
     @Override
+    public List<RequestDto> getNotAcceptedRequestsByUserId(final Long userId) {
+        final String sql = """
+            SELECT id, user_id, post_id, comment, status
+            FROM requests
+            WHERE user_id = :userId AND status IN ('pending', 'declined')
+            """;
+
+        return namedParameterJdbcTemplate.query(sql, Map.of("userId", userId), new RequestMapper());
+    }
+
+    @Override
     public List<RequestDto> getRequestsByPostId(final Long postId) {
         final String sql = """
             SELECT id, user_id, post_id, comment, status
