@@ -10,7 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 public interface RequestService {
     RequestFullDetailsResponse createRequest(HttpServletRequest request, CreateRequestRequest createRequestRequest);
 
-    GenericListResponse<RequestFullDetailsResponse> getUserRequestsByUserId(HttpServletRequest request);
+    GenericListResponse<RequestFullDetailsResponse> getUserNotAcceptedRequestsByUserId(HttpServletRequest request);
 
     GenericListResponse<RequestFullDetailsResponse> getRequestsByPostId(HttpServletRequest request, Long postId);
 

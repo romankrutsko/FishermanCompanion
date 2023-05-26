@@ -11,6 +11,8 @@ public interface RequestsRepository {
 
     List<RequestDto> getRequestsByUserId(Long userId);
 
+    List<RequestDto> getNotAcceptedRequestsByUserId(Long userId);
+
     List<RequestDto> getRequestsByPostId(Long postId);
 
     List<RequestDto> getRequestsByPostIdToDelete(Long postId);
