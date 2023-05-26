@@ -209,7 +209,7 @@ public class UserServiceImpl implements UserService {
     private void deleteAllUserConnectedEntitiesByUserId(final Long userId) {
         final List<Long> userPosts = postRepository.findAllUserPostsIds(userId);
         final List<RequestDto> requestsToPosts = userPosts.stream()
-                                                          .flatMap(postId -> requestsRepository.getRequestsByPostId(postId).stream())
+                                                          .flatMap(postId -> requestsRepository.getRequestsByPostIdToDelete(postId).stream())
                                                           .toList();
 
         requestsToPosts.forEach(requestDto -> requestsRepository.deleteRequest(requestDto.getId()));

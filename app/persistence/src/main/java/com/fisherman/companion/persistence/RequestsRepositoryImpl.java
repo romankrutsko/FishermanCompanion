@@ -77,6 +77,17 @@ public class RequestsRepositoryImpl implements RequestsRepository {
     }
 
     @Override
+    public List<RequestDto> getRequestsByPostIdToDelete(final Long postId) {
+        final String sql = """
+            SELECT id, user_id, post_id, comment, status
+            FROM requests
+            WHERE post_id = :postId
+            """;
+
+        return namedParameterJdbcTemplate.query(sql, Map.of("postId", postId), new RequestMapper());
+    }
+
+    @Override
     public boolean checkRequestExists(final Long userId, final Long postId) {
         String sql = """
                      SELECT NOT EXISTS (

@@ -290,17 +290,6 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public void deletePostById(final HttpServletRequest request, final Long postId) {
-        tokenService.verifyAuthentication(request);
-
-        final List<RequestDto> requestsToPost = requestsRepository.getRequestsByPostId(postId);
-
-        requestsToPost.forEach(requestDto -> requestsRepository.deleteRequest(requestDto.getId()));
-
-        postRepository.deleteById(postId);
-    }
-
-    @Override
     public GenericListResponse<PostResponse> findUserPostsWithPagination(final HttpServletRequest request, final Long userId, final int take, final int skip) {
         tokenService.verifyAuthentication(request);
 
@@ -346,5 +335,16 @@ public class PostServiceImpl implements PostService {
         final List<PostResponse> converted = convertAllPostResponses(futureTrips);
 
         return GenericListResponse.of(converted);
+    }
+
+    @Override
+    public void deletePostById(final HttpServletRequest request, final Long postId) {
+        tokenService.verifyAuthentication(request);
+
+        final List<RequestDto> requestsToPost = requestsRepository.getRequestsByPostIdToDelete(postId);
+
+        requestsToPost.forEach(requestDto -> requestsRepository.deleteRequest(requestDto.getId()));
+
+        postRepository.deleteById(postId);
     }
 }

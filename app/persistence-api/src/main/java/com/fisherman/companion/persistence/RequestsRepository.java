@@ -13,6 +13,8 @@ public interface RequestsRepository {
 
     List<RequestDto> getRequestsByPostId(Long postId);
 
+    List<RequestDto> getRequestsByPostIdToDelete(Long postId);
+
     boolean checkRequestExists(Long userId, Long postId);
 
     List<Long> getUserIdsOfAcceptedRequestsByPostId(Long postId, Long userId);
