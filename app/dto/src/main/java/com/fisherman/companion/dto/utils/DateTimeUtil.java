@@ -2,36 +2,32 @@ package com.fisherman.companion.dto.utils;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class DateTimeUtil {
     public static String getUkrDateTimeMinusDays(final long days) {
-        final LocalDateTime now = LocalDateTime.now();
-        final LocalDateTime resultDateTime = now.minusDays(days);
+        final ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Europe/Kiev"));
+        final ZonedDateTime resultDateTime = now.minusDays(days);
 
-        return formatLocalDateTimeInKyivZone(resultDateTime);
+        return formatZonedDateTimeInKyivZone(resultDateTime);
     }
 
     public static String getUkrDateTimePlusDays(final long days) {
-        final LocalDateTime now = LocalDateTime.now();
-        final LocalDateTime resultDateTime = now.plusDays(days);
+        final ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Europe/Kiev"));
+        final ZonedDateTime resultDateTime = now.plusDays(days);
 
-        return formatLocalDateTimeInKyivZone(resultDateTime);
+        return formatZonedDateTimeInKyivZone(resultDateTime);
     }
 
     public static String getCurrentUkrDateTime() {
-        final LocalDateTime now = LocalDateTime.now();
-
-        return formatLocalDateTimeInKyivZone(now);
+        final ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Europe/Kiev"));
+        return formatZonedDateTimeInKyivZone(now);
     }
 
-    public static String formatLocalDateTimeInKyivZone(final LocalDateTime dateTime) {
-        final ZoneId kyivTimeZone = ZoneId.of("Europe/Kiev");
-        final LocalDateTime kyivDateTime = dateTime.atZone(kyivTimeZone).toLocalDateTime();
-
+    public static String formatZonedDateTimeInKyivZone(final ZonedDateTime dateTime) {
         final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
-        return kyivDateTime.format(formatter);
+        return dateTime.format(formatter);
     }
 
     public static String convertDateTimeToTimestampFormat(final String dateTime) {
