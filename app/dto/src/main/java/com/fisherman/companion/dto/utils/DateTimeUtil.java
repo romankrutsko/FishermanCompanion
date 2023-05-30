@@ -35,7 +35,7 @@ public class DateTimeUtil {
     }
 
     public static String convertDateTimeToTimestampFormat(final String dateTime) {
-        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
         final LocalDateTime localDateTime = LocalDateTime.parse(dateTime, formatter);
 
         final DateTimeFormatter toTimestampFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
