@@ -24,7 +24,7 @@ public class GeolocationController {
     }
 
     @PostMapping ("/autocomplete")
-    GenericListResponse<String> autocompleteSettlements(final SettlementRequest request) {
+    GenericListResponse<String> autocompleteSettlements(@RequestBody final SettlementRequest request) {
         return geolocationService.getAutocompleteSettlements(request.settlement());
     }
 }
