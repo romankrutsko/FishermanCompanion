@@ -1,9 +1,10 @@
 package com.fisherman.companion.persistence;
 
+import static com.fisherman.companion.dto.utils.DateTimeUtil.getCurrentUkrDateTime;
+import static com.fisherman.companion.dto.utils.DateTimeUtil.getUkrDateTimePlusDays;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -75,7 +76,7 @@ public class PostRepositoryJdbcImpl implements PostRepository {
                 """;
 
         final Map<String, Object> params = Map.of(
-                "startDate", Timestamp.valueOf(paginationParams.timeToFilter()),
+                "startDate", getCurrentUkrDateTime(),
                 "take", paginationParams.take(),
                 "skip", paginationParams.skip()
         );
@@ -95,7 +96,7 @@ public class PostRepositoryJdbcImpl implements PostRepository {
                 """;
 
         final Map<String, Object> params = Map.of(
-                "startDate", Timestamp.valueOf(paginationParams.timeToFilter()),
+                "startDate", getCurrentUkrDateTime(),
                 "take", paginationParams.take(),
                 "skip", paginationParams.skip(),
                 "category", categoryId
@@ -105,7 +106,7 @@ public class PostRepositoryJdbcImpl implements PostRepository {
     }
 
     @Override
-    public List<PostDto> findPostsInBoundingBoxByCategory(final BoundingBoxDimensions boxDimensions, final LocalDateTime from, final LocalDateTime to, final Long categoryId) {
+    public List<PostDto> findPostsInBoundingBoxByCategory(final BoundingBoxDimensions boxDimensions, final Long categoryId) {
         String sql = """
                 SELECT * FROM posts
                 WHERE start_date BETWEEN :from AND :to
@@ -119,8 +120,8 @@ public class PostRepositoryJdbcImpl implements PostRepository {
                 "minLng", boxDimensions.minLng(),
                 "maxLat", boxDimensions.maxLat(),
                 "maxLng", boxDimensions.maxLng(),
-                "from", Timestamp.valueOf(from),
-                "to", Timestamp.valueOf(to),
+                "from", getCurrentUkrDateTime(),
+                "to", getUkrDateTimePlusDays(2),
                 "category", categoryId
         );
 
@@ -132,7 +133,7 @@ public class PostRepositoryJdbcImpl implements PostRepository {
         final String sql = """
                 SELECT *
                 FROM posts
-                WHERE user_id = :userId AND start_date > NOW()
+                WHERE user_id = :userId AND start_date > :now
                 ORDER BY start_date DESC
                 LIMIT :take
                 OFFSET :skip
@@ -141,7 +142,8 @@ public class PostRepositoryJdbcImpl implements PostRepository {
         final MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("userId", userId)
                 .addValue("take", take)
-                .addValue("skip", skip);
+                .addValue("skip", skip)
+                .addValue("now", getCurrentUkrDateTime());
 
         return namedParameterJdbcTemplate.query(sql, params, new PostMapper());
     }
@@ -152,24 +154,29 @@ public class PostRepositoryJdbcImpl implements PostRepository {
                 SELECT p.*
                 FROM posts p
                 JOIN requests r ON r.post_id = p.id
-                WHERE p.user_id = :userId AND p.start_date > NOW() 
-                AND r.status = 'accepted'        
-                """;
-
-        return namedParameterJdbcTemplate.query(sql, Map.of("userId", userId), new PostMapper());
-    }
-
-    @Override
-    public List<PostDto> findUserPostsWithStartDateInPast(final Long userId, final LocalDateTime timeFilterTo) {
-        final String sql = """
-                SELECT *
-                FROM posts
-                WHERE user_id = :userId AND start_date between :timeFilterTo AND NOW()         
+                WHERE p.user_id = :userId AND p.start_date > :now
+                AND r.status = 'accepted'
                 """;
 
         final MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("userId", userId)
-                .addValue("timeFilterTo", Timestamp.valueOf(timeFilterTo));
+                .addValue("now", getCurrentUkrDateTime());
+
+        return namedParameterJdbcTemplate.query(sql, params, new PostMapper());
+    }
+
+    @Override
+    public List<PostDto> findUserPostsWithStartDateInPast(final Long userId, final String timeFilterTo) {
+        final String sql = """
+                SELECT *
+                FROM posts
+                WHERE user_id = :userId AND start_date between :timeFilterTo AND :now
+                """;
+
+        final MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("userId", userId)
+                .addValue("timeFilterTo", timeFilterTo)
+                .addValue("now", getCurrentUkrDateTime());
 
         return namedParameterJdbcTemplate.query(sql, params, new PostMapper());
     }
@@ -181,26 +188,31 @@ public class PostRepositoryJdbcImpl implements PostRepository {
                 FROM posts p
                 JOIN requests r ON r.post_id = p.id
                 WHERE r.user_id = :userId
-                AND p.start_date > NOW() AND r.status = 'accepted'
+                AND p.start_date > :now AND r.status = 'accepted'
                 """;
 
-        return namedParameterJdbcTemplate.query(sql, Map.of("userId", userId), new PostMapper());
+        final MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("userId", userId)
+                .addValue("now", getCurrentUkrDateTime());
+
+        return namedParameterJdbcTemplate.query(sql, params, new PostMapper());
     }
 
     @Override
-    public List<PostDto> findPostsWithRequestFromUserInPast(final Long userId, final LocalDateTime timeFilterTo) {
+    public List<PostDto> findPostsWithRequestFromUserInPast(final Long userId, final String timeFilterTo) {
         final String sql = """
                 SELECT p.*
                 FROM posts p
                 JOIN requests r ON r.post_id = p.id
                 WHERE r.user_id = :userId
                 AND r.status = 'accepted'
-                AND start_date between :timeFilterTo AND NOW()          
+                AND start_date between :timeFilterTo AND :now
                 """;
 
         final MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("userId", userId)
-                .addValue("timeFilterTo", Timestamp.valueOf(timeFilterTo));
+                .addValue("timeFilterTo", timeFilterTo)
+                .addValue("now", getCurrentUkrDateTime());
 
         return namedParameterJdbcTemplate.query(sql, params, new PostMapper());
     }
@@ -268,7 +280,7 @@ public class PostRepositoryJdbcImpl implements PostRepository {
             post.setCategory(category);
             post.setTitle(rs.getString("title"));
             post.setDescription(rs.getString("description"));
-            post.setStartDate(rs.getTimestamp("start_date").toLocalDateTime());
+            post.setStartDate(rs.getString("start_date"));
             post.setLatitude(rs.getDouble("latitude"));
             post.setLongitude(rs.getDouble("longitude"));
             post.setContactInfo(rs.getString("contact_info"));

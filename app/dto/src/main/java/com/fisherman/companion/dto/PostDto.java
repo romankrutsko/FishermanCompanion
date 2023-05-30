@@ -1,7 +1,5 @@
 package com.fisherman.companion.dto;
 
-import java.time.LocalDateTime;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,7 +15,7 @@ public class PostDto {
     private CategoryDto category;
     private String title;
     private String description;
-    private LocalDateTime startDate;
+    private String startDate;
     private Double latitude;
     private Double longitude;
     private String contactInfo;

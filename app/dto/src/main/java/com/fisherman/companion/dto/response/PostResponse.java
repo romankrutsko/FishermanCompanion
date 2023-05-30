@@ -1,7 +1,5 @@
 package com.fisherman.companion.dto.response;
 
-import java.time.LocalDateTime;
-
 import com.fisherman.companion.dto.CategoryDto;
 
 import lombok.Builder;
@@ -13,7 +11,7 @@ public record PostResponse(
         CategoryDto category,
         String title,
         String description,
-        LocalDateTime startDate,
+        String startDate,
         String settlement,
         String contactInfo,
         boolean canRespond

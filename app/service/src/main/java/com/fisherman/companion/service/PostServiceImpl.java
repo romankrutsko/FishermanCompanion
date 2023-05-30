@@ -1,6 +1,8 @@
 package com.fisherman.companion.service;
 
-import java.time.LocalDateTime;
+import static com.fisherman.companion.dto.utils.DateTimeUtil.convertDateTimeToTimestampFormat;
+import static com.fisherman.companion.dto.utils.DateTimeUtil.getUkrDateTimeMinusDays;
+
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -22,6 +24,7 @@ import com.fisherman.companion.dto.request.UpdatePostRequest;
 import com.fisherman.companion.dto.response.GenericListResponse;
 import com.fisherman.companion.dto.response.PostResponse;
 import com.fisherman.companion.dto.response.UserResponse;
+import com.fisherman.companion.dto.utils.DateTimeUtil;
 import com.fisherman.companion.persistence.CategoryRepository;
 import com.fisherman.companion.persistence.PostRepository;
 import com.fisherman.companion.persistence.RequestsRepository;
@@ -73,7 +76,7 @@ public class PostServiceImpl implements PostService {
         post.setCategory(category);
         post.setTitle(createPostRequest.title());
         post.setDescription(createPostRequest.description());
-        post.setStartDate(LocalDateTime.parse(createPostRequest.startDate()));
+        post.setStartDate(convertDateTimeToTimestampFormat(createPostRequest.startDate()));
         post.setLatitude(geolocation.latitude());
         post.setLongitude(geolocation.longitude());
         post.setContactInfo(createPostRequest.contactInfo());
@@ -118,9 +121,7 @@ public class PostServiceImpl implements PostService {
     public GenericListResponse<PostResponse> findAllPosts(final HttpServletRequest request, final int take, final int skip) {
         final Long userId = checkIfUserLoggedInToFilterPosts(request);
 
-        final LocalDateTime timeToShowPosts = LocalDateTime.now().plusHours(2);
-
-        final GetPostsPaginationParams paginationParams = new GetPostsPaginationParams(skip, take, timeToShowPosts);
+        final GetPostsPaginationParams paginationParams = new GetPostsPaginationParams(skip, take);
 
         final List<PostDto> posts = postRepository.findAllCategoriesPosts(paginationParams);
 
@@ -192,7 +193,7 @@ public class PostServiceImpl implements PostService {
         post.setCategory(category);
         post.setTitle(updatePostRequest.title());
         post.setDescription(updatePostRequest.description());
-        post.setStartDate(Optional.ofNullable(startDate).map(LocalDateTime::parse).orElse(null));
+        post.setStartDate(Optional.ofNullable(startDate).map(DateTimeUtil::convertDateTimeToTimestampFormat).orElse(null));
         post.setLatitude(geolocation.latitude());
         post.setLongitude(geolocation.longitude());
         post.setContactInfo(updatePostRequest.contactInfo());
@@ -205,9 +206,8 @@ public class PostServiceImpl implements PostService {
         final Long userId = checkIfUserLoggedInToFilterPosts(request);
 
         final boolean isSortedByRating = getPostsByCategoryRequest.sortByUserRating();
-        final LocalDateTime timeToShowPosts = LocalDateTime.now().plusHours(2);
 
-        final GetPostsPaginationParams paginationParams = new GetPostsPaginationParams(skip, take, timeToShowPosts);
+        final GetPostsPaginationParams paginationParams = new GetPostsPaginationParams(skip, take);
 
         final List<PostDto> posts = postRepository.findPostsByCategory(paginationParams, getPostsByCategoryRequest.categoryId());
 
@@ -228,10 +228,7 @@ public class PostServiceImpl implements PostService {
 
         final BoundingBoxDimensions boxDimensions = setBoundingBoxDimensions(lat, lng, radius);
 
-        final LocalDateTime curTimePlusTwoHour = LocalDateTime.now().plusHours(2);
-        final LocalDateTime curTimePlusTwoDays = curTimePlusTwoHour.plusDays(2);
-
-        final List<PostDto> postsInBoundingBox = postRepository.findPostsInBoundingBoxByCategory(boxDimensions, curTimePlusTwoHour, curTimePlusTwoDays, categoryId);
+        final List<PostDto> postsInBoundingBox = postRepository.findPostsInBoundingBoxByCategory(boxDimensions, categoryId);
 
         final List<PostDto> filteredByRadius = postsInBoundingBox.stream()
                                                                  .filter(post -> calcDistanceByHaversineInKm(lat, lng, post.getLatitude(), post.getLongitude()) <= radius)
@@ -321,11 +318,11 @@ public class PostServiceImpl implements PostService {
     public GenericListResponse<PostResponse> findUserFinishedTrips(final HttpServletRequest request, final Long userId, final Long postsAfterDaysToShow) {
         tokenService.verifyAuthentication(request);
 
-        final LocalDateTime timeToFilterFinishedPosts = LocalDateTime.now().minusDays(postsAfterDaysToShow);
+        final String timeToFilterFrom = getUkrDateTimeMinusDays(postsAfterDaysToShow);
 
-        final List<PostDto> listOfUsersPosts = postRepository.findUserPostsWithStartDateInPast(userId, timeToFilterFinishedPosts);
+        final List<PostDto> listOfUsersPosts = postRepository.findUserPostsWithStartDateInPast(userId, timeToFilterFrom);
 
-        final List<PostDto> listOfPostsWithRequestsFromCurUser = postRepository.findPostsWithRequestFromUserInPast(userId, timeToFilterFinishedPosts);
+        final List<PostDto> listOfPostsWithRequestsFromCurUser = postRepository.findPostsWithRequestFromUserInPast(userId, timeToFilterFrom);
 
         final List<PostDto> futureTrips = Stream.concat(listOfUsersPosts.stream(), listOfPostsWithRequestsFromCurUser.stream())
                                                   .sorted(Comparator.comparing(PostDto::getStartDate)
