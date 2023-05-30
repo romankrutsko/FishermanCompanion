@@ -2,6 +2,7 @@ package com.fisherman.companion.persistence;
 
 import static com.fisherman.companion.dto.utils.DateTimeUtil.getCurrentUkrDateTime;
 import static com.fisherman.companion.dto.utils.DateTimeUtil.getUkrDateTimePlusDays;
+import static com.fisherman.companion.dto.utils.DateTimeUtil.trimSeconds;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -282,7 +283,7 @@ public class PostRepositoryJdbcImpl implements PostRepository {
             post.setCategory(category);
             post.setTitle(rs.getString("title"));
             post.setDescription(rs.getString("description"));
-            post.setStartDate(rs.getString("start_date"));
+            post.setStartDate(trimSeconds(rs.getString("start_date")));
             post.setLatitude(rs.getDouble("latitude"));
             post.setLongitude(rs.getDouble("longitude"));
             post.setContactInfo(rs.getString("contact_info"));

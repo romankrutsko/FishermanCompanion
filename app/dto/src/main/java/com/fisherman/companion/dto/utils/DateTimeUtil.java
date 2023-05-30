@@ -37,4 +37,15 @@ public class DateTimeUtil {
         final DateTimeFormatter toTimestampFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         return localDateTime.format(toTimestampFormatter);
     }
+
+    public static String trimSeconds(final String dateTime) {
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        final LocalDateTime startDate = LocalDateTime.parse(dateTime, formatter);
+
+        final LocalDateTime trimmedStartDate = startDate.withSecond(0);
+
+        final DateTimeFormatter formatterWithoutSeconds = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+
+        return trimmedStartDate.format(formatterWithoutSeconds);
+    }
 }
