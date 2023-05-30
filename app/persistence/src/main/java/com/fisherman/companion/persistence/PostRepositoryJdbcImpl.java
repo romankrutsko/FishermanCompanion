@@ -178,6 +178,8 @@ public class PostRepositoryJdbcImpl implements PostRepository {
                 .addValue("timeFilterTo", timeFilterTo)
                 .addValue("now", getCurrentUkrDateTime());
 
+        System.out.println("Time is: " + getCurrentUkrDateTime());
+
         return namedParameterJdbcTemplate.query(sql, params, new PostMapper());
     }
 
