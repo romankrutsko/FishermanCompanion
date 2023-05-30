@@ -24,7 +24,7 @@ import com.fisherman.companion.persistence.PostRepository;
 import com.fisherman.companion.persistence.RatingRepository;
 import com.fisherman.companion.persistence.RequestsRepository;
 import com.fisherman.companion.persistence.UserRepository;
-import com.fisherman.companion.service.exception.RequestException;
+import com.fisherman.companion.service.exception.BadRequestException;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -47,7 +47,7 @@ public class UserServiceImpl implements UserService {
         final String hashedPassword = hashService.hash(createUserRequest.password());
 
         if (userRepository.isUsernameNotUnique(username)) {
-            throw new RequestException(ResponseStatus.USERNAME_IS_TAKEN.getCode());
+            throw new BadRequestException(ResponseStatus.USERNAME_IS_TAKEN.getCode());
         }
 
         return saveUser(createUserRequest, hashedPassword);
@@ -83,7 +83,7 @@ public class UserServiceImpl implements UserService {
                            try {
                                return cloudStorageService.uploadFile(file);
                            } catch (Exception e) {
-                               throw new RequestException(ResponseStatus.UNABLE_TO_UPLOAD_FILE.getCode());
+                               throw new BadRequestException(ResponseStatus.UNABLE_TO_UPLOAD_FILE.getCode());
                            }
                        })
                        .orElse(null);

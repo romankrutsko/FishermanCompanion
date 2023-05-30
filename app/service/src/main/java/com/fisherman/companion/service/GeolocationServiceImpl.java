@@ -14,7 +14,7 @@ import com.fisherman.companion.dto.Predictions;
 import com.fisherman.companion.dto.response.GenericListResponse;
 import com.fisherman.companion.dto.response.PredictionResponse;
 import com.fisherman.companion.dto.response.ResponseStatus;
-import com.fisherman.companion.service.exception.RequestException;
+import com.fisherman.companion.service.exception.BadRequestException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -49,7 +49,7 @@ public class GeolocationServiceImpl implements GeolocationService {
         return Optional.of(predictionResponse)
                        .filter(response -> response.status().equals("OK"))
                        .map(PredictionResponse::predictions)
-                       .orElseThrow(() -> new RequestException(ResponseStatus.UNABLE_TO_GET_SETTLEMENTS.getCode()));
+                       .orElseThrow(() -> new BadRequestException(ResponseStatus.UNABLE_TO_GET_SETTLEMENTS.getCode()));
     }
 
     @Override
@@ -78,7 +78,7 @@ public class GeolocationServiceImpl implements GeolocationService {
                        .filter(r -> r.get("status").asText().equals("OK"))
                        .map(r -> r.get("results").get(0).get("geometry"))
                        .map(this::getCoordinatesFromGeometry)
-                       .orElseThrow(() -> new RequestException(ResponseStatus.UNABLE_TO_GET_SETTLEMENTS.getCode()));
+                       .orElseThrow(() -> new BadRequestException(ResponseStatus.UNABLE_TO_GET_COORDINATES_FROM_SETTLEMENT.getCode()));
     }
 
     private Geolocation getCoordinatesFromGeometry(final JsonNode geometryNode) {
@@ -106,6 +106,6 @@ public class GeolocationServiceImpl implements GeolocationService {
                        .map(results -> results.get(0))
                        .map(result -> result.get("formatted_address"))
                        .map(JsonNode::asText)
-                       .orElseThrow(() -> new RequestException(ResponseStatus.UNABLE_TO_GET_SETTLEMENT_FROM_COORDINATES.getCode()));
+                       .orElseThrow(() -> new BadRequestException(ResponseStatus.UNABLE_TO_GET_SETTLEMENT_FROM_COORDINATES.getCode()));
     }
 }

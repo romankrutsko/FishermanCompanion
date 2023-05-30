@@ -7,7 +7,7 @@ import com.fisherman.companion.dto.request.LoginRequest;
 import com.fisherman.companion.dto.response.LoginResponse;
 import com.fisherman.companion.dto.response.ResponseStatus;
 import com.fisherman.companion.dto.response.UserResponse;
-import com.fisherman.companion.service.exception.RequestException;
+import com.fisherman.companion.service.exception.BadRequestException;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -27,7 +27,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         final Long userId = userService.loginUser(loginRequest.username(), hashedPassword);
 
         if (userId == null) {
-            throw new RequestException(ResponseStatus.WRONG_CREDENTIALS.getCode());
+            throw new BadRequestException(ResponseStatus.WRONG_CREDENTIALS.getCode());
         }
 
         final UserResponse user = userService.findUserById(userId);

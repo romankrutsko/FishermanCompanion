@@ -1,6 +1,5 @@
 package com.fisherman.companion.persistence;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import com.fisherman.companion.dto.BoundingBoxDimensions;
@@ -16,17 +15,17 @@ public interface PostRepository {
 
     List<PostDto> findPostsByCategory(GetPostsPaginationParams paginationParams, Long categoryId);
 
-    List<PostDto> findPostsInBoundingBoxByCategory(BoundingBoxDimensions boxDimensions, LocalDateTime timeFrom, LocalDateTime timeTo, Long categoryId);
+    List<PostDto> findPostsInBoundingBoxByCategory(BoundingBoxDimensions boxDimensions, Long categoryId);
 
     List<PostDto> findUserPostsWithPagination(Long userId, int take, int skip);
 
     List<PostDto> findUserPostsWithFutureStartDate(Long userId);
 
-    List<PostDto> findUserPostsWithStartDateInPast(Long userId, LocalDateTime timeToFilter);
+    List<PostDto> findUserPostsWithStartDateInPast(Long userId, String timeToFilter);
 
     List<PostDto> findPostsWithRequestsFromUserByUserId(Long userId);
 
-    List<PostDto> findPostsWithRequestFromUserInPast(Long userId, LocalDateTime timeFilterTo);
+    List<PostDto> findPostsWithRequestFromUserInPast(Long userId, String timeFilterTo);
 
     List<Long> findAllUserPostsIds(Long userId);
 
