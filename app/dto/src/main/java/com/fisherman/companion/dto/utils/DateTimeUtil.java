@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 public class DateTimeUtil {
     public static String getUkrDateTimeMinusDays(final long days) {
@@ -30,8 +31,19 @@ public class DateTimeUtil {
         return dateTime.format(formatter);
     }
 
+
     public static String convertDateTimeToTimestampFormat(final String dateTime) {
-        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
+        try {
+            return getStringDateTime(dateTime);
+        } catch (DateTimeParseException e) {
+            final String formattedTime = dateTime.replace("T", " ");
+
+            return getStringDateTime(formattedTime);
+        }
+    }
+
+    private static String getStringDateTime(final String dateTime) {
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         final LocalDateTime localDateTime = LocalDateTime.parse(dateTime, formatter);
 
         final DateTimeFormatter toTimestampFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
