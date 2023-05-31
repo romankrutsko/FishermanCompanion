@@ -44,6 +44,7 @@ public class FishermanCompanionConfig {
         config.addAllowedOrigin("https://fishermancompanion-production.up.railway.app");
         config.addAllowedOrigin("http://localhost:8080");
         config.addAllowedOrigin("https://fisherman-companion-frontend.vercel.app");
+        config.addAllowedOrigin("https://fisherman-companion-frontend-flax.vercel.app");
         config.addAllowedHeader("*");
         config.setAllowCredentials(true);
         config.addAllowedMethod("*");
