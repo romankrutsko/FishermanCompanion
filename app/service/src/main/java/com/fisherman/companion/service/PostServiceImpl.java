@@ -3,6 +3,8 @@ package com.fisherman.companion.service;
 import static com.fisherman.companion.dto.utils.DateTimeUtil.convertDateTimeToTimestampFormat;
 import static com.fisherman.companion.dto.utils.DateTimeUtil.getUkrDateTimeMinusDays;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -213,7 +215,7 @@ public class PostServiceImpl implements PostService {
 
         final List<PostResponse> postResponses = getPostResponses(posts, userId);
 
-        return isSortedByRating ? sortByRatingAndStartTime(postResponses) : GenericListResponse.of(postResponses);
+        return isSortedByRating ? sortByRating(postResponses) : GenericListResponse.of(postResponses);
     }
 
     @Override
@@ -236,7 +238,7 @@ public class PostServiceImpl implements PostService {
 
         final List<PostResponse> postsConvertedToResponse = getPostResponses(filteredByRadius, userId);
 
-        return isSortedByRating ? sortByRatingAndStartTime(postsConvertedToResponse) : GenericListResponse.of(postsConvertedToResponse);
+        return isSortedByRating ? sortByRating(postsConvertedToResponse) : GenericListResponse.of(postsConvertedToResponse);
     }
 
     private BoundingBoxDimensions setBoundingBoxDimensions(final Double lat, final Double lng, final Double radius) {
@@ -275,13 +277,14 @@ public class PostServiceImpl implements PostService {
         return EARTH_RADIUS_KM * c;
     }
 
-    public GenericListResponse<PostResponse> sortByRatingAndStartTime(final List<PostResponse> postList) {
-        final List<PostResponse> response = postList.stream()
-                       .sorted(Comparator.comparing(PostResponse::startDate)
-                                         .thenComparingDouble(post -> Optional.ofNullable(post.user().getAverageRating())
-                                                                              .orElse(0.0))
-                                         .reversed())
-                       .toList();
+    private GenericListResponse<PostResponse> sortByRating(final List<PostResponse> postList) {
+        final List<PostResponse> response = new ArrayList<>(postList.stream()
+                                                                     .sorted(Comparator.comparingDouble(post -> Optional.ofNullable(post.user())
+                                                                          .map(UserResponse::getAverageRating)
+                                                                          .orElse(0.0)))
+                                                                     .toList());
+
+        Collections.reverse(response);
 
         return GenericListResponse.of(response);
     }
