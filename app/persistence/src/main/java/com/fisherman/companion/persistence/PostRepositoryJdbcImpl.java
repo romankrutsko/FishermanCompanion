@@ -122,7 +122,7 @@ public class PostRepositoryJdbcImpl implements PostRepository {
                 "maxLat", boxDimensions.maxLat(),
                 "maxLng", boxDimensions.maxLng(),
                 "from", getCurrentUkrDateTime(),
-                "to", getUkrDateTimePlusDays(2),
+                "to", getUkrDateTimePlusDays(7),
                 "category", categoryId
         );
 
