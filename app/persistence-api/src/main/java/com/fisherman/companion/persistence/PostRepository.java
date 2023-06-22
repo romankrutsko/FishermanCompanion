@@ -11,11 +11,15 @@ public interface PostRepository {
 
     PostDto findPostById(Long postId);
 
-    List<PostDto> findAllCategoriesPosts(GetPostsPaginationParams params);
+    List<PostDto> findAllCategoriesPosts(GetPostsPaginationParams params, Long userId);
 
-    List<PostDto> findPostsByCategory(GetPostsPaginationParams paginationParams, Long categoryId);
+    Long countPostsAllCategories(Long userId);
 
-    List<PostDto> findPostsInBoundingBoxByCategory(BoundingBoxDimensions boxDimensions, Long categoryId);
+    List<PostDto> findPostsByCategory(GetPostsPaginationParams paginationParams, Long categoryId, Long userId);
+
+    Long countPostsByCategory(Long userId);
+
+    List<PostDto> findPostsInBoundingBoxByCategory(BoundingBoxDimensions boxDimensions, Long categoryId, Long userId);
 
     List<PostDto> findUserPostsWithPagination(Long userId, int take, int skip);
 

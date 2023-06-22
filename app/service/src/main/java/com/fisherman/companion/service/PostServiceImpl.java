@@ -125,11 +125,13 @@ public class PostServiceImpl implements PostService {
 
         final GetPostsPaginationParams paginationParams = new GetPostsPaginationParams(skip, take);
 
-        final List<PostDto> posts = postRepository.findAllCategoriesPosts(paginationParams);
+        final List<PostDto> posts = postRepository.findAllCategoriesPosts(paginationParams, userId);
 
         final List<PostResponse> response = getPostResponses(posts, userId);
 
-        return GenericListResponse.of(response);
+        final Long totalCount = postRepository.countPostsAllCategories(userId);
+
+        return new GenericListResponse<>(totalCount, response);
     }
 
     private Long checkIfUserLoggedInToFilterPosts(final HttpServletRequest request) {
@@ -211,11 +213,13 @@ public class PostServiceImpl implements PostService {
 
         final GetPostsPaginationParams paginationParams = new GetPostsPaginationParams(skip, take);
 
-        final List<PostDto> posts = postRepository.findPostsByCategory(paginationParams, getPostsByCategoryRequest.categoryId());
+        final List<PostDto> posts = postRepository.findPostsByCategory(paginationParams, getPostsByCategoryRequest.categoryId(), userId);
 
         final List<PostResponse> postResponses = getPostResponses(posts, userId);
 
-        return isSortedByRating ? sortByRating(postResponses) : GenericListResponse.of(postResponses);
+        final Long countAllPostsByCategory = postRepository.countPostsByCategory(userId);
+
+        return isSortedByRating ? sortByRating(postResponses) : new GenericListResponse<>(countAllPostsByCategory, postResponses);
     }
 
     @Override
@@ -230,7 +234,7 @@ public class PostServiceImpl implements PostService {
 
         final BoundingBoxDimensions boxDimensions = setBoundingBoxDimensions(lat, lng, radius);
 
-        final List<PostDto> postsInBoundingBox = postRepository.findPostsInBoundingBoxByCategory(boxDimensions, categoryId);
+        final List<PostDto> postsInBoundingBox = postRepository.findPostsInBoundingBoxByCategory(boxDimensions, categoryId, userId);
 
         final List<PostDto> filteredByRadius = postsInBoundingBox.stream()
                                                                  .filter(post -> calcDistanceByHaversineInKm(lat, lng, post.getLatitude(), post.getLongitude()) <= radius)

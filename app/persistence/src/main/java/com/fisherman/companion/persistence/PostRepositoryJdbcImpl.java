@@ -67,16 +67,17 @@ public class PostRepositoryJdbcImpl implements PostRepository {
     }
 
     @Override
-    public List<PostDto> findAllCategoriesPosts(final GetPostsPaginationParams paginationParams) {
+    public List<PostDto> findAllCategoriesPosts(final GetPostsPaginationParams paginationParams, final Long userId) {
         final String sql = """
                 SELECT * FROM posts
-                WHERE start_date >= :startDate
+                WHERE start_date >= :startDate AND user_id!=:userId
                 ORDER BY start_date
                 LIMIT :take
                 OFFSET :skip
                 """;
 
         final Map<String, Object> params = Map.of(
+                "userId", userId,
                 "startDate", getCurrentUkrDateTime(),
                 "take", paginationParams.take(),
                 "skip", paginationParams.skip()
@@ -85,18 +86,35 @@ public class PostRepositoryJdbcImpl implements PostRepository {
         return namedParameterJdbcTemplate.query(sql, params, new PostMapper());
     }
 
+    @Override
+    public Long countPostsAllCategories(final Long userId) {
+        final String sql = """
+            SELECT COUNT(id) FROM posts
+            WHERE start_date >= :startDate AND user_id != :userId
+            ORDER BY start_date
+            """;
+
+        final Map<String, Object> params = Map.of(
+                "userId", userId,
+                "startDate", getCurrentUkrDateTime()
+        );
+
+        return namedParameterJdbcTemplate.queryForObject(sql, params, Long.class);
+    }
+
 
     @Override
-    public List<PostDto> findPostsByCategory(final GetPostsPaginationParams paginationParams, final Long categoryId) {
+    public List<PostDto> findPostsByCategory(final GetPostsPaginationParams paginationParams, final Long categoryId, final Long userId) {
         final String sql = """
                 SELECT * FROM posts
-                WHERE start_date >= :startDate AND category_id = :category
+                WHERE start_date >= :startDate AND category_id = :category AND user_id!=:userId
                 ORDER BY start_date
                 LIMIT :take
                 OFFSET :skip
                 """;
 
         final Map<String, Object> params = Map.of(
+                "userId", userId,
                 "startDate", getCurrentUkrDateTime(),
                 "take", paginationParams.take(),
                 "skip", paginationParams.skip(),
@@ -107,16 +125,33 @@ public class PostRepositoryJdbcImpl implements PostRepository {
     }
 
     @Override
-    public List<PostDto> findPostsInBoundingBoxByCategory(final BoundingBoxDimensions boxDimensions, final Long categoryId) {
+    public Long countPostsByCategory(final Long userId) {
+        final String sql = """
+            SELECT COUNT(id) FROM posts
+            WHERE start_date >= :startDate AND category_id = :category AND user_id != :userId
+            ORDER BY start_date
+            """;
+
+        final Map<String, Object> params = Map.of(
+                "userId", userId,
+                "startDate", getCurrentUkrDateTime()
+        );
+
+        return namedParameterJdbcTemplate.queryForObject(sql, params, Long.class);
+    }
+
+    @Override
+    public List<PostDto> findPostsInBoundingBoxByCategory(final BoundingBoxDimensions boxDimensions, final Long categoryId, final Long userId) {
         String sql = """
                 SELECT * FROM posts
                 WHERE start_date BETWEEN :from AND :to
                     AND latitude BETWEEN :minLat AND :maxLat
                     AND longitude BETWEEN :minLng AND :maxLng
-                    AND category_id = :category
+                    AND category_id = :category AND user_id!=:userId
                 ORDER BY start_date;
                 """;
         final Map<String, Object> params = Map.of(
+                "userId", userId,
                 "minLat", boxDimensions.minLat(),
                 "minLng", boxDimensions.minLng(),
                 "maxLat", boxDimensions.maxLat(),
