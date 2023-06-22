@@ -217,7 +217,7 @@ public class PostServiceImpl implements PostService {
 
         final List<PostResponse> postResponses = getPostResponses(posts, userId);
 
-        final Long countAllPostsByCategory = postRepository.countPostsByCategory(userId);
+        final Long countAllPostsByCategory = postRepository.countPostsByCategory(getPostsByCategoryRequest.categoryId(), userId);
 
         return isSortedByRating ? sortByRating(postResponses) : new GenericListResponse<>(countAllPostsByCategory, postResponses);
     }

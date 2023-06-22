@@ -125,7 +125,7 @@ public class PostRepositoryJdbcImpl implements PostRepository {
     }
 
     @Override
-    public Long countPostsByCategory(final Long userId) {
+    public Long countPostsByCategory(final Long categoryId, final Long userId) {
         final String sql = """
             SELECT COUNT(id) FROM posts
             WHERE start_date >= :startDate AND category_id = :category AND user_id != :userId
@@ -134,6 +134,7 @@ public class PostRepositoryJdbcImpl implements PostRepository {
 
         final Map<String, Object> params = Map.of(
                 "userId", userId,
+                "category", categoryId,
                 "startDate", getCurrentUkrDateTime()
         );
 

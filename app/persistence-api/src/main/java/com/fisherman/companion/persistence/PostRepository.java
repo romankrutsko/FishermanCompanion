@@ -17,7 +17,7 @@ public interface PostRepository {
 
     List<PostDto> findPostsByCategory(GetPostsPaginationParams paginationParams, Long categoryId, Long userId);
 
-    Long countPostsByCategory(Long userId);
+    Long countPostsByCategory(Long categoryId, Long userId);
 
     List<PostDto> findPostsInBoundingBoxByCategory(BoundingBoxDimensions boxDimensions, Long categoryId, Long userId);
 
